@@ -1,0 +1,32 @@
+
+A New Common Lisp Blog Engine
+Cyrus Harmon
+April 17, 2007
+
+nuclblog
+
+* Fundamental data types:
+
+  ** blog
+
+  ** entry/post
+
+  ** comment
+
+  ** user
+
+* Screens:
+
+  ** main page
+
+  ** entry/post
+
+  ** new entry
+
+  ** edit entry
+  
+  ** new comment
+
+  ** new post
+
+  ** new user

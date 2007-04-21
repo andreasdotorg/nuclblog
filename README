@@ -1,0 +1,25 @@
+
+nuclblog
+
+Cyrus Harmon
+Sat Apr 21 10:31:24 2007
+
+nuclblog is a rewrite of Brian Mastenbrook's cl-blog. The main reasons
+for rewriting this are to simplify the code a bit and to support
+hunchentoot (and possibly to use UCW) instead of araneida.
+
+CSS
+
+We would like to support arbitrary designs for blog pages using
+CSS. To do so we will emit HTML ids and classes that allow for the
+visual layout to be specified with CSS rules.
+
+Main Page:
+
+header
+nav
+content
+
+box
+box-head
+box-context

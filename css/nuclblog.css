@@ -1,0 +1,18 @@
+body { }
+
+div#banner {
+  top: 0px;
+  text-align: center;
+}
+
+div#nav {
+  float: right;
+  width: 5cm;
+}
+
+div#content {
+  padding-top: 12px;
+  overflow: hidden;
+  margin-top: 0px;
+}
+
