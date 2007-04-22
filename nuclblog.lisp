@@ -36,6 +36,37 @@
    (contents :initarg :contents :accessor blog-entry-contents)
    (trackbacks :initarg :trackbacks :accessor blog-entry-trackbacks :initform nil)))
 
+(defun get-next-entry-number (blog)
+  (let ((numbers (mapcar #'blog-entry-number (blog-entries blog))))
+    (if numbers
+        (1+ (reduce #'max numbers))
+        0)))
+
+(defun store-blog-entries (blog path)
+  (ensure-directories-exist path)
+  (cl-store:store (blog-entries blog) path))
+
+(defun read-blog-entries (blog &key (path (blog-entry-storage-path blog)))
+  (setf (blog-entries blog)
+        (cl-store:restore path)))
+
+(defun create-blog-entry (blog category title contents user
+                          &key
+                          (number (get-next-entry-number blog))
+                          (time (get-universal-time)))
+  (let ((entry (make-instance 'blog-entry
+                              :category category
+                              :user user
+                              :number number
+                              :title title
+                              :time time
+                              :revised-time time
+                              :contents contents)))
+    (setf (blog-entries blog)
+          (cons entry (blog-entries blog))))
+  (let ((path (blog-entry-storage-path blog)))
+    (when path (store-blog-entries blog path))))
+
 (defmethod blog-new-entry-url ((blog blog))
   (concatenate-url (blog-url-root blog) "/new"))
 
@@ -68,4 +99,9 @@
 
 (defun get-entry (number blog)
   (find number (blog-entries blog) :key #'blog-entry-number))
+
+(defun sorted-blog-entries (blog)
+  (sort (copy-seq (blog-entries blog))
+        #'>
+        :key #'blog-entry-time))
 

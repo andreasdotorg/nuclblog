@@ -8,8 +8,13 @@
                 (:div :class "entry-title"
                       (:h1 (str (blog-entry-title entry))))
                 (:div :class "entry-date"
-                      (:h2 (str (format-universal-time
-                                 (blog-entry-time entry))))))
+                      (:h2 (str (hunchentoot::rfc-1123-date
+                                 (blog-entry-time entry)))))
+                (let ((user (blog-entry-user entry)))
+                  (when user
+                    (htm (:div :class "entry-user"
+                               (:h3 "posted by " (str user)
+                                    " in " (str (blog-entry-category entry))))))))
           (:div :class "entry-contents"
                 (str (blog-entry-contents entry))))))
 
@@ -21,7 +26,7 @@
      blog
      (blog-title blog)
      (lambda ()
-       (loop for entry in (blog-entries blog)
+       (loop for entry in (sorted-blog-entries blog)
             for i below 10
           do (entry entry)))))
 
@@ -35,13 +40,16 @@
          (:p "Sorry, adding new blog entries not supported yet.")))))
 
   (define-easy-handler (blog-archives :uri (concatenate-url (blog-url-root blog) "/archives"))
-      ()
+      (category)
     (blog::blog-page
      blog
      "Make me a BLOG!!"
      (lambda ()
-       (with-html
-         (:p "Sorry, blog entry archives not supported yet.")))))
+       (loop for entry in (sorted-blog-entries blog)
+          when (or (null category)
+                   (equal (blog-entry-category entry)
+                          category))
+          do (entry entry)))))
 
   (define-easy-handler (blog-archives-rss :uri (concatenate-url (blog-url-root blog) "/archives.rss"))
       ()

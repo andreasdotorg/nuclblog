@@ -33,7 +33,7 @@
                                       (format nil "month=~A&year=~A"
                                               month year)
                                       "")))
-    (html-encode:encode-for-pre (puri:render-uri url nil))))
+    (puri:render-uri url nil)))
 
 (defmacro box ((&key class id) head &rest body)
   `(with-html-output (*standard-output*)
