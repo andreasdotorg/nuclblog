@@ -17,7 +17,7 @@
    (page-css :initarg :page-css :accessor blog-page-css :initform nil)
    (categories :initarg :categories :accessor blog-categories :initform nil)
    (authenticator :initarg :authenticator :accessor blog-authenticator
-		  :initform (make-instance 'file-authenticator))
+		  :initform nil)
    (allow-html-editor :initarg allow-html-editor :initform nil
 		      :accessor blog-allow-html-editor)
    (url-root :initarg :url-root :accessor blog-url-root)

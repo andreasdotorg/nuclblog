@@ -10,7 +10,7 @@
   :version #.(with-open-file
                  (vers (merge-pathnames "version.lisp-expr" *load-truename*))
                (read vers))
-  :depends-on (:hunchentoot :cl-who :cl-store)
+  :depends-on (:hunchentoot :cl-who :cl-store :puri)
   :components ((:cl-source-file "defpackage")
                (:cl-source-file "utilities":depends-on ("defpackage"))
                (:cl-source-file "nuclblog" :depends-on ("defpackage" "utilities"))
