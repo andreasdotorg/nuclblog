@@ -6,13 +6,73 @@ div#banner {
 }
 
 div#nav {
-  float: right;
-  width: 5cm;
+  float: left;
+  width: 180px;
+  margin-top: 6px;
 }
 
 div#content {
   padding-top: 12px;
-  overflow: hidden;
   margin-top: 0px;
+  margin-left: 185px;
 }
+
+div.box {
+  margin: 6px;
+}
+
+div.box-body {
+  padding: 1px 2px 6px 0px;
+  margin: 0px;
+}
+
+div.box-head {
+  padding: 2px 6px 1px 0px;
+  margin: 0px;
+}
+
+div.nav-button {
+  margin: 6px;
+  padding: 0px;
+}
+
+div.nav-button > div.box-head {
+  padding: 1px;
+  margin: 1px;
+}
+
+div.nav-button > div.box-body {
+  padding: 2px;
+}
+
+ul {
+  margin-left: 12px;
+}
+
+ul.recent-entries {
+}
+
+ul.buttons {
+  margin: 2px 0px 0px 0px;
+  list-style-type: none;
+}
+
+a.button, a.button > img {
+  border: none;
+}
+
+div.entry {
+  margin-bottom: 12px;
+  padding: 0px;
+}
+
+div.entry-head { }
+
+div.entry-title { }
+
+div.entry-date { }
+
+div.entry-text { }
+
+div.entry-contents { }
 

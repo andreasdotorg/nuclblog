@@ -7,7 +7,9 @@
 
 (defclass blog ()
   ((short-name :initarg :short-name :accessor blog-short-name)
+   (title :initarg :title :accessor blog-title)
    (subtitle :initarg :subtitle :accessor blog-subtitle)
+   (logo-img-url :initarg :logo-img-url :accessor blog-logo-img-url :initform nil)
    (users :initarg :users :accessor blog-users)
    (owner-email :initarg :owner-email :accessor blog-owner-email)
    (blog-links :initarg :blog-links :accessor blog-blog-links :initform nil)
@@ -20,6 +22,7 @@
 		      :accessor blog-allow-html-editor)
    (url-root :initarg :url-root :accessor blog-url-root)
    (entries :accessor blog-entries :initform (list))
+   (buttons :initarg :buttons :accessor blog-buttons :initform (list))
    (entry-storage-path :initarg :entry-storage-path
                        :accessor blog-entry-storage-path :initform nil)))
 
@@ -34,37 +37,35 @@
    (trackbacks :initarg :trackbacks :accessor blog-entry-trackbacks :initform nil)))
 
 (defmethod blog-new-entry-url ((blog blog))
-  (puri:merge-uris (blog-url-root blog) "new"))
+  (concatenate-url (blog-url-root blog) "/new"))
 
 (defmethod blog-display-entry-url ((blog blog))
-  (puri:merge-uris (blog-url-root blog) "display/"))
+  (concatenate-url (blog-url-root blog) "/display"))
 
 (defmethod blog-archives-url ((blog blog))
-  (puri:merge-uris (blog-url-root blog) "archives"))
+  (concatenate-url (blog-url-root blog) "/archives"))
 
 (defmethod blog-rss-url ((blog blog))
-  (puri:merge-uris (blog-url-root blog) "archives.rss"))
+  (concatenate-url (blog-url-root blog) "/archives.rss"))
 
 (defmethod blog-edit-entry-url ((blog blog))
-  (puri:merge-uris (blog-url-root blog) "edit/"))
+  (concatenate-url (blog-url-root blog) "/edit"))
 
 (defmethod blog-delete-entry-url ((blog blog))
-  (puri:merge-uris (blog-url-root blog) "delete/"))
+  (concatenate-url (blog-url-root blog) "/delete"))
 
 (defmethod blog-email-redirect-url ((blog blog))
-  (puri:merge-uris (blog-url-root blog) "email"))
+  (concatenate-url (blog-url-root blog) "/email"))
 
 (defmethod blog-trackback-url ((blog blog))
-  (puri:merge-uris (blog-url-root blog) "trackback/"))
+  (concatenate-url (blog-url-root blog) "/trackback"))
 
 (defmethod blog-new-category-url ((blog blog))
-  (puri:merge-uris (blog-url-root blog) "new-category"))
+  (concatenate-url (blog-url-root blog) "/new-category"))
 
 (defmethod blog-css-url ((blog blog))
-  (puri:merge-uris (blog-url-root blog) "css/"))
+  (concatenate-url (blog-url-root blog) "/css"))
 
-(defmethod blog-entries ((blog blog))
-  (entry-store-entries (blog-entry-store blog)))
-
-
+(defun get-entry (number blog)
+  (find number (blog-entries blog) :key #'blog-entry-number))
 
