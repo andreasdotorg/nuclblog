@@ -1,12 +1,13 @@
 
 (in-package :nuclblog)
 
-(defun entry (entry)
+(defun entry-html (blog entry)
   (with-html
     (:div :class "entry"
           (:div :class "entry-head"
                 (:div :class "entry-title"
-                      (:h1 (str (blog-entry-title entry))))
+                      (:h1 (:a :href (make-entry-url blog entry)
+                               (str (blog-entry-title entry)))))
                 (:div :class "entry-date"
                       (:h2 (str (hunchentoot::rfc-1123-date
                                  (blog-entry-time entry)))))
@@ -14,9 +15,22 @@
                   (when user
                     (htm (:div :class "entry-user"
                                (:h3 "posted by " (str user)
-                                    " in " (str (blog-entry-category entry))))))))
+                                    " in " (:a :href
+                                               (make-archives-url
+                                                blog (blog-entry-category entry))
+                                               (str (blog-entry-category entry)))))))))
           (:div :class "entry-contents"
                 (str (blog-entry-contents entry))))))
+
+(defun entry-rss (blog entry)
+  (with-html
+    (:item
+     (:title (str (blog-entry-title entry)))
+     (:link (str (make-entry-url blog entry)))
+     (:description (str (escape-string (blog-entry-contents entry))))
+     (:pubdate (str (hunchentoot::rfc-1123-date
+                      (blog-entry-time entry))))
+     (:guid (str (make-entry-url blog entry))))))
 
 (defun define-blog-handlers (blog)
   
@@ -27,8 +41,8 @@
      (blog-title blog)
      (lambda ()
        (loop for entry in (sorted-blog-entries blog)
-            for i below 10
-          do (entry entry)))))
+          for i below 10
+          do (entry-html blog entry)))))
 
   (define-easy-handler (blog-new :uri (concatenate-url (blog-url-root blog) "/new"))
       ()
@@ -43,41 +57,41 @@
       (category)
     (blog::blog-page
      blog
-     "Make me a BLOG!!"
+     (format nil "~A: archives" (blog-title blog))
      (lambda ()
        (loop for entry in (sorted-blog-entries blog)
           when (or (null category)
                    (equal (blog-entry-category entry)
                           category))
-          do (entry entry)))))
+          do (entry-html blog entry)))))
 
   (define-easy-handler (blog-archives-rss :uri (concatenate-url (blog-url-root blog) "/archives.rss"))
-      ()
-    (blog::blog-page
-     blog
-     "Make me a BLOG!!"
-     (lambda ()
-       (with-html
-         (:p "Sorry, blog entry RSS archives not supported yet.")))))
+      ((limit :parameter-type 'integer :init-form 10))
+    (setf (content-type) "application/rss+xml")
+    
+    (with-xml-output-to-string (*standard-output*)
+      (htm (:rss :version 2.0
+                 (:channel
+                  (:title (str (blog::blog-title blog)))
+                  (:link (str (blog::blog-url-root blog)))
+                  (:description (str (blog::blog-subtitle blog)))
+                  (:pubdate (str (hunchentoot::rfc-1123-date)))
+                  (loop for entry in (sorted-blog-entries blog)
+                     for i below limit
+                     do (entry-rss blog entry)))))))
 
   (define-easy-handler (blog-email :uri (concatenate-url (blog-url-root blog) "/email"))
       ()
-    (blog::blog-page
-     blog
-     "Make me a BLOG!!"
-     (lambda ()
-       (with-html
-         (:p "Sorry, emailing the maintainer not supported yet.")))))
+    (redirect "mailto:webmaster@cyrusharmon.org" :permanently t))
 
   (define-easy-handler (blog-display :uri (concatenate-url (blog-url-root blog) "/display"))
       ((id :parameter-type 'integer))
     (blog::blog-page
      blog
-     "Make me a BLOG!!"
+     (format nil "~A: display" (blog-title blog))
      (lambda ()
        (if (and id (numberp id))
-           (entry
-             (get-entry id blog))
+           (entry-html blog (get-entry id blog))
            (with-html
              (:p "Please select a blog entry for display.")))))))
 

@@ -20,21 +20,6 @@
                    category)
       (if rss (blog-rss-url blog) (blog-archives-url blog))))
 
-(defun make-archives-url (blog &key category month year)
-  (let ((url (puri:parse-uri (blog-archives-url blog))))
-    (setf (puri:uri-query url) (format nil "~A~A~A"
-                                  (if category
-                                      (format nil "category=~A" category)
-                                      "")
-                                  (if (and category month year)
-                                      "&"
-                                      "")
-                                  (if (and month year)
-                                      (format nil "month=~A&year=~A"
-                                              month year)
-                                      "")))
-    (puri:render-uri url nil)))
-
 (defmacro box ((&key class id) head &rest body)
   `(with-html-output (*standard-output*)
      (:div :id ,id :class ,(concatenate 'string "box " class)
@@ -43,6 +28,46 @@
                          ,head))
            (:div :class "box-body"
                  ,@body))))
+
+(defun recent-entries (blog)
+  (with-html
+    (box (:class "nav-box" :id "nav-box-recent-entries")
+         (:h2 "Recent entries")
+         (:ul :class "recent-entries"
+              (loop for i from 1 to 10
+                 for j in (blog-entries blog)
+                 do (htm
+                     (:li
+                      (:a :href (entry-link blog j)
+                          (str (blog-entry-title j))))))))))
+
+(defun categories (blog)
+  (with-html
+    (box (:class "nav-box" :id "nav-box-categories")
+         (:h2 "Categories")
+         (:ul
+          (loop for i in (blog-categories blog)
+             do (htm
+                 (:li (:a :href (make-archives-url blog i)
+                          (str i))
+                      " "
+                      (:a :href (archives-url blog :category i :rss t)
+                          "(RSS)"))))))))
+
+(defun buttons (blog)
+  (with-html
+    (box (:class "nav-box nav-button" :id "nav-box-buttons")
+         nil
+         (:ul :class "buttons"
+              (loop for button in (blog-buttons blog)
+                 do
+                 (destructuring-bind (&key href-url id img-url alt) button
+                   (htm
+                    (:li
+                     (:a :href href-url :class "button"
+                         (:img :id id
+                               :src img-url
+                               :alt alt))))))))))
 
 (defun nav (blog)
   (with-html-output (*standard-output*)
@@ -55,38 +80,9 @@
                 (:li (:a :href (blog-archives-url blog) "Archives"))
                 (:li (:a :href (archives-url blog :rss t) "Syndicate (RSS)"))
                 (:li (:b (:a :href (blog-email-redirect-url blog) "Send Comments")))))
-          
-          (box (:class "nav-box" :id "nav-box-2")
-               (:h2 "Recent entries")
-               (:ul :class "recent-entries"
-                (loop for i from 1 to 10
-                   for j in (blog-entries blog)
-                   do (htm
-                       (:li
-                        (:a :href (entry-link blog j)
-                            (str (blog-entry-title j))))))))
-          (box (:class "nav-box" :id "nav-box-3")
-                (:h2 "Categories")
-                (:ul
-                 (loop for i in (blog-categories blog)
-                    do (htm
-                        (:li (:a :href (make-archives-url blog :category i)
-                                 (str i))
-                             " "
-                             (:a :href (archives-url blog :category i :rss t)
-                                 "(RSS)"))))))
-          (box (:class "nav-button")
-               nil
-               (:ul :class "buttons"
-                    (loop for button in (blog-buttons blog)
-                       do
-                         (destructuring-bind (&key href-url id img-url alt) button
-                           (htm
-                            (:li
-                             (:a :href href-url :class "button"
-                                 (:img :id id
-                                       :src img-url
-                                       :alt alt)))))))))))
+          (recent-entries blog)
+          (categories blog)
+          (buttons blog))))
 
 (defun banner (blog)
   (with-html-output (*standard-output*)
