@@ -1,6 +1,8 @@
 
 (in-package :nuclblog)
 
+(setf who::*downcase-tags-p* nil)
+
 (defun entry-html (blog entry)
   (with-html
     (:div :class "entry"
@@ -24,13 +26,13 @@
 
 (defun entry-rss (blog entry)
   (with-html
-    (:item
-     (:title (str (blog-entry-title entry)))
-     (:link (str (make-entry-url blog entry)))
-     (:description (str (escape-string (blog-entry-contents entry))))
-     (:pubdate (str (hunchentoot::rfc-1123-date
+    (:|item|
+     (:|title| (str (blog-entry-title entry)))
+     (:|link| (str (make-full-entry-url blog entry)))
+     (:|description| (str (escape-string (blog-entry-contents entry))))
+     (:|pubDate| (str (hunchentoot::rfc-1123-date
                       (blog-entry-time entry))))
-     (:guid (str (make-entry-url blog entry))))))
+     (:|guid| (str (make-full-entry-url blog entry))))))
 
 (defun define-blog-handlers (blog)
   
@@ -70,15 +72,15 @@
     (setf (content-type) "application/rss+xml")
     
     (with-xml-output-to-string (*standard-output*)
-      (htm (:rss :version 2.0
-                 (:channel
-                  (:title (str (blog::blog-title blog)))
-                  (:link (str (blog::blog-url-root blog)))
-                  (:description (str (blog::blog-subtitle blog)))
-                  (:pubdate (str (hunchentoot::rfc-1123-date)))
-                  (loop for entry in (sorted-blog-entries blog)
-                     for i below limit
-                     do (entry-rss blog entry)))))))
+      (htm (:|rss| :|version| 2.0
+             (:|channel|
+               (:|title| (str (blog::blog-title blog)))
+               (:|link| (str (make-full-root-url blog)))
+               (:|description| (str (blog::blog-subtitle blog)))
+               (:|pubDate| (str (hunchentoot::rfc-1123-date)))
+               (loop for entry in (sorted-blog-entries blog)
+                  for i below limit
+                  do (entry-rss blog entry)))))))
 
   (define-easy-handler (blog-email :uri (concatenate-url (blog-url-root blog) "/email"))
       ()
