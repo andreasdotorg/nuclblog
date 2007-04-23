@@ -1,7 +1,8 @@
 
 (in-package :nuclblog)
 
-(setf who::*downcase-tags-p* nil)
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (setf who::*downcase-tags-p* nil))
 
 (defun entry-html (blog entry)
   (with-html

@@ -69,19 +69,27 @@
                                :src img-url
                                :alt alt))))))))))
 
-(defun nav (blog)
-  (with-html-output (*standard-output*)
-    (:div :id "nav" :class "nav"
-          (box (:class "nav-box" :id "nav-box-1")
+(defun main-nav (blog)
+  (box (:class "nav-box" :id "nav-box-1")
                (:h2 (str (blog-short-name blog)))
                (:ul
                 (:li (:a :href (blog-url-root blog) "Main"))
                 (:li (:a :href (blog-new-entry-url blog) "New entry"))
                 (:li (:a :href (blog-archives-url blog) "Archives"))
                 (:li (:a :href (archives-url blog :rss t) "Syndicate (RSS)"))
-                (:li (:b (:a :href (blog-email-redirect-url blog) "Send Comments")))))
-          (recent-entries blog)
-          (categories blog)
+                (:li (:b (:a :href (blog-email-redirect-url blog) "Send Comments"))))))
+
+(defgeneric nav-boxes (blog))
+
+(defmethod nav-boxes ((blog blog))
+  (main-nav blog)
+  (recent-entries blog)
+  (categories blog))
+
+(defun nav (blog)
+  (with-html-output (*standard-output*)
+    (:div :id "nav" :class "nav"
+          (nav-boxes blog)
           (buttons blog))))
 
 (defun banner (blog)
