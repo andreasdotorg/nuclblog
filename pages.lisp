@@ -96,7 +96,7 @@
                      (:a :href href-url :class "button"
                          (:img :id id
                                :src img-url
-                               :alt alt))))))))))
+                               :alt (escape-string alt)))))))))))
 
 (defun main-nav (blog)
   (box (:class "nav-box" :id "nav-box-1")
