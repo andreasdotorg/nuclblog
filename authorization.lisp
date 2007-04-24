@@ -2,8 +2,6 @@
 (in-package :nuclblog)
 
 (defun validate-user (user passwd)
-  (print (cons user passwd)
-         *debug-io*)
   (and (string= user "cyrus")
        (string= passwd "bogus")))
 
