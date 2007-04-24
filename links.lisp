@@ -31,7 +31,7 @@
 (in-package :nuclblog)
 
 (defun get-protocol ()
-  (symbol-name (server-protocol)))
+  (if (ssl-p) "https" "http"))
 
 (defun make-full-root-url (blog)
   (concatenate-url (get-protocol) "://" (host) "" (blog-url-root blog)))
