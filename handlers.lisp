@@ -1,10 +1,44 @@
+;;; file: handlers.lisp
+;;;
+;;; Copyright (c) 2007 Cyrus Harmon (ch-lisp@bobobeach.com)
+;;; All rights reserved.
+;;;
+;;; Redistribution and use in source and binary forms, with or without
+;;; modification, are permitted provided that the following conditions
+;;; are met:
+;;;
+;;;   * Redistributions of source code must retain the above copyright
+;;;     notice, this list of conditions and the following disclaimer.
+;;;
+;;;   * Redistributions in binary form must reproduce the above
+;;;     copyright notice, this list of conditions and the following
+;;;     disclaimer in the documentation and/or other materials
+;;;     provided with the distribution.
+;;;
+;;; THIS SOFTWARE IS PROVIDED BY THE AUTHOR 'AS IS' AND ANY EXPRESSED
+;;; OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+;;; WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+;;; ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+;;; DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+;;; DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+;;; GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+;;; INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+;;; WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+;;; NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+;;; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;;;
 
 (in-package :nuclblog)
 
+;;; we need to not downcase tags because RSS is case-sensitive. In
+;;; particular, the pubDate tag must be in camelCase. Yuck. I'm not
+;;; sure we need the eval-when stuff, but I was having trouble getting
+;;; this to work without it.
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (setf who::*downcase-tags-p* nil))
 
 (defun entry-html (blog entry)
+  "Outputs html for a blog entry."
   (with-html
     (:div :class "entry"
           (:div :class "entry-head"
@@ -31,6 +65,7 @@
                        (:a :href (make-delete-entry-url blog entry) "delete")))))))
 
 (defun entry-rss (blog entry)
+  "Outputs RSS 2.0 for a given blog entry."
   (with-html
     (:|item|
      (:|title| (str (blog-entry-title entry)))
@@ -41,8 +76,9 @@
      (:|guid| (str (make-full-entry-url blog entry))))))
 
 (defun define-blog-handlers (blog)
+  "Defines the easy handlers for a given blog."
   
-  (define-easy-handler (blog-main :uri (blog-url-root blog))
+  (define-blog-handler (blog)
       ()
     (blog::blog-page
      blog
@@ -51,8 +87,8 @@
        (loop for entry in (sorted-blog-entries blog)
           for i below 10
           do (entry-html blog entry)))))
-
-  (define-easy-handler (blog-archives :uri (concatenate-url (blog-url-root blog) "/archives"))
+  
+  (define-blog-handler (blog :uri "/archives")
       (category)
     (blog::blog-page
      blog
@@ -64,7 +100,7 @@
                           category))
           do (entry-html blog entry)))))
 
-  (define-easy-handler (blog-archives-rss :uri (concatenate-url (blog-url-root blog) "/archives.rss"))
+  (define-blog-handler (blog :uri "/archives.rss")
       ((limit :parameter-type 'integer :init-form 10))
     (setf (content-type) "application/rss+xml")
     
@@ -79,11 +115,11 @@
                   for i below limit
                   do (entry-rss blog entry)))))))
 
-  (define-easy-handler (blog-email :uri (concatenate-url (blog-url-root blog) "/email"))
+  (define-blog-handler (blog :uri "/email")
       ()
-    (redirect "mailto:webmaster@cyrusharmon.org" :permanently t))
+    (redirect (format nil "mailto:~A" (blog-owner-email blog)) :permanently t))
 
-  (define-easy-handler (blog-display :uri (concatenate-url (blog-url-root blog) "/display"))
+  (define-blog-handler (blog :uri "/display")
       ((id :parameter-type 'integer))
     (blog::blog-page
      blog
@@ -94,8 +130,8 @@
            (with-html
              (:p "Please select a blog entry for display."))))))
 
-  (define-easy-handler (blog-new-browser-auth :uri (concatenate-url (blog-url-root blog) "/new-browser-auth")
-                                 :default-request-type :post)
+  (define-blog-handler (blog :uri "/new-browser-auth"
+                             :default-request-type :post)
       (category content title)
     (multiple-value-bind (user password)
         (authorization)
@@ -130,8 +166,8 @@
                               (:input :type :submit :value "Submit" (when content (str content)))))))))
           (require-authorization))))
 
-  (define-easy-handler (blog-new :uri (concatenate-url (blog-url-root blog) "/new")
-                                 :default-request-type :post)
+  (define-blog-handler (blog :uri "/new"
+                             :default-request-type :post)
       (category
        content
        title
@@ -168,8 +204,8 @@
                          (:br)
                          (:input :type :submit :value "Submit")))))))))
   
-  (define-easy-handler (blog-edit :uri (concatenate-url (blog-url-root blog) "/edit")
-                                  :default-request-type :both)
+  (define-blog-handler (blog :uri "/edit"
+                             :default-request-type :both)
       ((id :parameter-type 'integer)
        category
        content
@@ -224,7 +260,7 @@
                                   (:br)
                                   (:input :type :submit :value "Submit")))))))))))))
 
-  (define-easy-handler (blog-delete :uri (concatenate-url (blog-url-root blog) "/delete"))
+  (define-blog-handler (blog :uri "/delete")
       ((id :parameter-type 'integer)
        (user :init-form (session-value 'user))
        (password))
@@ -245,7 +281,7 @@
               (with-html
                 (:p "Error deleting entry"))))))))
   
-  (define-easy-handler (blog-login :uri (concatenate-url (blog-url-root blog) "/login")
+  (define-blog-handler (blog :uri "/login"
                                    :default-request-type :post)
       ((user :init-form (session-value 'user))
        (password))
@@ -258,7 +294,7 @@
         (with-html
           (:p "User " (str user) " successfully logged in."))))))
 
-  (define-easy-handler (blog-logout :uri (concatenate-url (blog-url-root blog) "/logout"))
+  (define-blog-handler (blog :uri "/logout")
       ()
     (setf (session-value 'user-authenticated-p) nil)
     (blog::blog-page
@@ -267,4 +303,3 @@
      (lambda ()
        (with-html
          (:p "You have successfully logged out."))))))
-
