@@ -50,10 +50,13 @@
    (allow-html-editor :initarg allow-html-editor :initform nil
 		      :accessor blog-allow-html-editor)
    (url-root :initarg :url-root :accessor blog-url-root)
-   (entries :accessor blog-entries :initform (list))
    (buttons :initarg :buttons :accessor blog-buttons :initform (list))
+   (entries :accessor blog-entries :initform (list))
    (entry-storage-path :initarg :entry-storage-path
                        :accessor blog-entry-storage-path :initform nil)
+   (passwords :accessor blog-passwords :initform (make-hash-table :test 'equal))
+   (password-storage-path :initarg :password-storage-path
+                          :accessor blog-password-storage-path :initform nil)
    (handler-alist :initarg :handler-alist :accessor blog-handler-alist :initform (list))))
 
 (defclass blog-entry ()

@@ -40,7 +40,7 @@
                  (vers (merge-pathnames "version.lisp-expr" *load-truename*))
                (read vers))
   :licence "BSD"
-  :depends-on (:hunchentoot :cl-who :cl-store)
+  :depends-on (:hunchentoot :cl-who :cl-store :md5)
   :components
   ((:static-file "README")
    (:static-file "LICENSE")

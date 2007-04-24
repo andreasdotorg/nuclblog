@@ -135,7 +135,7 @@
       (category content title)
     (multiple-value-bind (user password)
         (authorization)
-      (if (validate-user user password)
+      (if (check-password blog user password)
           (blog::blog-page
            blog
            (format nil "~A: new entry" (blog-title blog))

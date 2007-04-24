@@ -30,13 +30,30 @@
 
 (in-package :nuclblog)
 
-(defun validate-user (user passwd)
-  (and (string= user "cyrus")
-       (string= passwd "bogus")))
+(defun read-blog-passwords (blog &key (path (blog-password-storage-path blog)))
+  (when (probe-file path))
+  (setf (blog-passwords blog)
+        (cl-store:restore path)))
+
+(defun store-blog-passwords (blog &key (path (blog-password-storage-path blog)))
+  (ensure-directories-exist path)
+  (cl-store:store (blog-passwords blog) path))
+
+(defmethod get-password-hash ((blog blog) user)
+  (gethash user (blog-passwords blog)))
+
+(defmethod set-password ((blog blog) user password)
+  (setf (gethash user (blog-passwords blog))
+        (md5:md5sum-sequence (coerce password 'simple-string))))
+
+(defmethod check-password ((blog blog) user password)
+  (and password
+       (equalp (get-password-hash blog user)
+               (md5:md5sum-sequence (coerce password 'simple-string)))))
 
 (defmacro authorized-page ((user password) &rest body)
-  `(if (or (and ,user ,password)
-           (validate-user ,user password)
+  `(if (or (and ,user ,password
+                (check-password blog ,user ,password))
            (session-value 'user-authenticated-p))
       (progn
         (unless (session-value 'user-authenticated-p)
