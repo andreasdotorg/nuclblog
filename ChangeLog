@@ -1,0 +1,91 @@
+2007-04-24  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* links.lisp, version.lisp-expr: nuclblog 0.0.12
+	 * use hunchentoot:ssl-p to decide if we're using http or https for link
+	   construction
+
+	* authorization.lisp, handlers.lisp, nuclblog.asd, nuclblog.lisp, version.lisp-expr:
+	nuclblog 0.0.11
+	 * redid password authorization
+	 * fix authorized-page logic
+	 * validate-user -> check-password
+	 * add :md5 dependency
+	 * add passwords and password-storage-path slots to blog class
+
+	* authorization.lisp, defpackage.lisp, handlers.lisp, links.lisp, nuclblog.asd, nuclblog.lisp, pages.lisp, utilities.lisp, version.lisp-expr:
+	nuclblog 0.0.10
+	 * added copyright notices
+	 * added some docstrings
+	   define-easy-handler.
+	 * redirect mail urls to the right place
+	 * added define-blog-handler and used this in preference to
+	 * added handler-alist for the blog-handlers
+	 * added dispatch-blog-handlers and *blog-dispatch-blogs*
+
+	* authorization.lisp, version.lisp-expr: nuclblog 0.0.9
+	 * remove debugging print
+
+	* authorization.lisp, handlers.lisp, links.lisp, nuclblog.asd, nuclblog.lisp, pages.lisp, utilities.lisp, version.lisp-expr:
+	nuclblog 0.0.8
+	 * added skeletal (and weak) authorization functionality
+	 * added login and logout handlers
+	 * added new blog entry handler
+	 * added edit and delete handlers
+	 * full-xxx-url functions now use get-protocol instead of hardcoding http
+	 * moved blog-xxx-url functions into links.lisp
+	 * removed puri dependency
+	 * call encode-url on some values
+	 * show login and logout nav items wen appropriate
+
+2007-04-23  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* handlers.lisp, pages.lisp, version.lisp-expr: nuclblog 0.0.7
+
+	 * added eval-when hackery to try to get downcasing of tags in cl-who turned
+	   off
+	 * cleaned up nav stuff and added a g.f. for nav-boxes (should rename nav to
+	   sidebar at some point)
+
+	* handlers.lisp, links.lisp, utilities.lisp, version.lisp-expr:
+	nuclblog 0.0.6
+	 * don't downcase cl-who tags
+	 * use || for case preserving keywords
+
+	* LICENSE, css/nuclblog.css, handlers.lisp, links.lisp, make-dist.sh, nuclblog.asd, pages.lisp, utilities.lisp, version.lisp-expr:
+	nuclblog 0.0.5
+	 * added license
+	 * entry -> entry-html
+	 * added entry-rss
+	 * fixed email handler
+	 * added with-xml-output-to-string
+	 * fixed blog page titles
+	 * added links.lisp with link generation functions
+	 * added make-dist
+	 * added recent-entries, categories and buttons functions
+	 * minor css tweaks
+
+2007-04-22  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* nuclblog.asd, nuclblog.lisp, version.lisp-expr: nuclblog 0.0.4
+	 * depend-on puri (this should probably go away at some point)
+	 * authenticator initform is now nil (for the moment)
+
+	* handlers.lisp, nuclblog.asd, nuclblog.lisp, pages.lisp, utilities.lisp, version.lisp-expr:
+	hunchy 0.0.3
+	 * use hunchentoot date stuff instead of araneida stuff
+	 * sort blog entries when looping through
+	 * added archives handler (no RSS yet)
+	 * cleaned up depends
+	 * added store-blog-entries and read-blog-entries
+	 * added create-blog-entry and get-next-entry-number
+
+	* .cvsignore, css/nuclblog.css, defpackage.lisp, handlers.lisp, nuclblog.asd, nuclblog.lisp, pages.lisp, utilities.lisp, version.lisp-expr:
+	nuclblog 0.0.2
+	 * now rudimentary things like displaying blog entries works
+
+2007-04-21  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* NOTES, README, css/nuclblog.css, defpackage.lisp, file-authenticator.lisp, nuclblog.asd, nuclblog.lisp, pages.lisp, utilities.lisp, version.lisp-expr:
+	nuclblog 0.0.1
+	 * first (not-yet-working) version
+

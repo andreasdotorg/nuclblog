@@ -44,6 +44,7 @@
   :components
   ((:static-file "README")
    (:static-file "LICENSE")
+   (:static-file "ChangeLog")
    (:cl-source-file "defpackage")
    (:cl-source-file "utilities":depends-on ("defpackage"))
    (:cl-source-file "nuclblog" :depends-on ("defpackage" "utilities"))
