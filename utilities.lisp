@@ -40,10 +40,14 @@
 
 (defmacro with-xml-output-to-string ((&optional (stream *standard-output*))
                            &body body)
-  `(let ((who::*downcase-tags-p* nil))
-     (with-html-output-to-string (,stream)
+  (let ((who::*downcase-tags-p* nil))
+    `(with-html-output-to-string (,stream)
        (princ "<?xml version='1.0'?>" ,stream)
        ,@body)))
+
+(defmacro with-xml (&body body)
+  `(with-html-output (*standard-output*)
+     ,@body))
 
 (defun concatenate-url (base &rest strings)
   (apply #'concatenate 'string base strings))

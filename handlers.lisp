@@ -30,13 +30,6 @@
 
 (in-package :nuclblog)
 
-;;; we need to not downcase tags because RSS is case-sensitive. In
-;;; particular, the pubDate tag must be in camelCase. Yuck. I'm not
-;;; sure we need the eval-when stuff, but I was having trouble getting
-;;; this to work without it.
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (setf who::*downcase-tags-p* nil))
-
 (defun entry-html (blog entry)
   "Outputs html for a blog entry."
   (with-html
@@ -64,16 +57,42 @@
                        " "
                        (:a :href (make-delete-entry-url blog entry) "delete")))))))
 
-(defun entry-rss (blog entry)
-  "Outputs RSS 2.0 for a given blog entry."
-  (with-html
-    (:|item|
-     (:|title| (str (blog-entry-title entry)))
-     (:|link| (str (make-full-entry-url blog entry)))
-     (:|description| (str (escape-string (blog-entry-contents entry))))
-     (:|pubDate| (str (hunchentoot::rfc-1123-date
-                      (blog-entry-time entry))))
-     (:|guid| (str (make-full-entry-url blog entry))))))
+;;; ugh. who::*downcase-tags-p* needs to be set at compile time. Let's
+;;; try to be polite about how we got about setting this global
+;;; flag. I wish there a better way to do this...
+
+(defparameter *tag-state* who::*downcase-tags-p*)
+
+(progn
+  (eval-when (:compile-toplevel :load-toplevel :execute)
+    (setf *tag-state* who::*downcase-tags-p*)
+    (setf who::*downcase-tags-p* nil))  
+
+  (defun entry-rss (blog entry)
+    "Outputs RSS 2.0 for a given blog entry."
+    (with-xml
+      (:|item|
+        (:|title| (str (blog-entry-title entry)))
+        (:|link| (str (make-full-entry-url blog entry)))
+        (:|description| (str (escape-string (blog-entry-contents entry))))
+        (:|pubDate| (str (hunchentoot::rfc-1123-date
+                          (blog-entry-time entry))))
+        (:|guid| (str (make-full-entry-url blog entry))))))
+
+  (defun channel-rss (blog &key (limit 10))
+    (setf (content-type) "application/rss+xml")
+    (with-xml-output-to-string (*standard-output*)
+      (htm (:|rss| :|version| 2.0
+             (:|channel|
+               (:|title| (str (blog::blog-title blog)))
+               (:|link| (str (make-full-root-url blog)))
+               (:|description| (str (blog::blog-subtitle blog)))
+               (:|pubDate| (str (hunchentoot::rfc-1123-date)))
+               (loop for entry in (sorted-blog-entries blog)
+                  for i below limit
+                  do (entry-rss blog entry)))))))
+  (eval-when (:compile-toplevel :load-toplevel :execute)
+    (setf who::*downcase-tags-p* *tag-state*)))
 
 (defun define-blog-handlers (blog)
   "Defines the easy handlers for a given blog."
@@ -102,18 +121,7 @@
 
   (define-blog-handler (blog :uri "/archives.rss")
       ((limit :parameter-type 'integer :init-form 10))
-    (setf (content-type) "application/rss+xml")
-    
-    (with-xml-output-to-string (*standard-output*)
-      (htm (:|rss| :|version| 2.0
-             (:|channel|
-               (:|title| (str (blog::blog-title blog)))
-               (:|link| (str (make-full-root-url blog)))
-               (:|description| (str (blog::blog-subtitle blog)))
-               (:|pubDate| (str (hunchentoot::rfc-1123-date)))
-               (loop for entry in (sorted-blog-entries blog)
-                  for i below limit
-                  do (entry-rss blog entry)))))))
+    (channel-rss blog :limit limit))
 
   (define-blog-handler (blog :uri "/email")
       ()
@@ -282,7 +290,7 @@
                 (:p "Error deleting entry"))))))))
   
   (define-blog-handler (blog :uri "/login"
-                                   :default-request-type :post)
+                             :default-request-type :post)
       ((user :init-form (session-value 'user))
        (password))
     (authorized-page
