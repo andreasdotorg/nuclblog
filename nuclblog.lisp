@@ -67,35 +67,13 @@
   (let ((path (blog-entry-storage-path blog)))
     (when path (store-blog-entries blog path))))
 
-(defmethod blog-new-entry-url ((blog blog))
-  (concatenate-url (blog-url-root blog) "/new"))
-
-(defmethod blog-display-entry-url ((blog blog))
-  (concatenate-url (blog-url-root blog) "/display"))
-
-(defmethod blog-archives-url ((blog blog))
-  (concatenate-url (blog-url-root blog) "/archives"))
-
-(defmethod blog-rss-url ((blog blog))
-  (concatenate-url (blog-url-root blog) "/archives.rss"))
-
-(defmethod blog-edit-entry-url ((blog blog))
-  (concatenate-url (blog-url-root blog) "/edit"))
-
-(defmethod blog-delete-entry-url ((blog blog))
-  (concatenate-url (blog-url-root blog) "/delete"))
-
-(defmethod blog-email-redirect-url ((blog blog))
-  (concatenate-url (blog-url-root blog) "/email"))
-
-(defmethod blog-trackback-url ((blog blog))
-  (concatenate-url (blog-url-root blog) "/trackback"))
-
-(defmethod blog-new-category-url ((blog blog))
-  (concatenate-url (blog-url-root blog) "/new-category"))
-
-(defmethod blog-css-url ((blog blog))
-  (concatenate-url (blog-url-root blog) "/css"))
+(defun delete-blog-entry (blog number)
+  (when (find number (blog::blog-entries blog) :key #'blog::blog-entry-number)
+    (setf (blog::blog-entries blog)
+          (delete number (blog::blog-entries blog) :key #'blog::blog-entry-number))
+    (let ((path (blog-entry-storage-path blog)))
+      (when path (store-blog-entries blog path)))
+    t))
 
 (defun get-entry (number blog)
   (find number (blog-entries blog) :key #'blog-entry-number))

@@ -11,7 +11,7 @@
                  (vers (merge-pathnames "version.lisp-expr" *load-truename*))
                (read vers))
   :licence "BSD"
-  :depends-on (:hunchentoot :cl-who :cl-store :puri)
+  :depends-on (:hunchentoot :cl-who :cl-store)
   :components
   ((:static-file "README")
    (:static-file "LICENSE")
@@ -19,6 +19,7 @@
    (:cl-source-file "utilities":depends-on ("defpackage"))
    (:cl-source-file "nuclblog" :depends-on ("defpackage" "utilities"))
    (:cl-source-file "links" :depends-on ("defpackage" "utilities" "nuclblog"))
+   (:cl-source-file "authorization" :depends-on ("defpackage" "utilities" "nuclblog"))
    (:cl-source-file "pages" :depends-on ("defpackage"
                                          "utilities"
                                          "nuclblog"
@@ -26,6 +27,7 @@
    (:cl-source-file "handlers" :depends-on ("defpackage"
                                             "utilities"
                                             "nuclblog"
-                                            "links"))
+                                            "links"
+                                            "authorization"))
    (:module "css"
             :components ((:static-file nuclblog-css :pathname #p"nuclblog.css")))))

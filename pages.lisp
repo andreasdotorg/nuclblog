@@ -77,7 +77,10 @@
                 (:li (:a :href (blog-new-entry-url blog) "New entry"))
                 (:li (:a :href (blog-archives-url blog) "Archives"))
                 (:li (:a :href (archives-url blog :rss t) "Syndicate (RSS)"))
-                (:li (:b (:a :href (blog-email-redirect-url blog) "Send Comments"))))))
+                (:li (:a :href (blog-email-redirect-url blog) "Send Comments"))
+                (if (session-value 'user-authenticated-p)
+                    (htm (:li (:a :href (blog-logout-url blog) "Logout")))
+                    (htm (:li (:a :href (blog-login-url blog) "Login")))))))
 
 (defgeneric nav-boxes (blog))
 

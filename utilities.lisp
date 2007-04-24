@@ -16,7 +16,6 @@
        (princ "<?xml version='1.0'?>" ,stream)
        ,@body)))
 
-
 (defun concatenate-url (base &rest strings)
   (apply #'concatenate 'string base strings))
 
