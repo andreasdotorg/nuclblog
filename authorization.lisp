@@ -31,9 +31,9 @@
 (in-package :nuclblog)
 
 (defun read-blog-passwords (blog &key (path (blog-password-storage-path blog)))
-  (when (probe-file path))
-  (setf (blog-passwords blog)
-        (cl-store:restore path)))
+  (when (probe-file path)
+    (setf (blog-passwords blog)
+          (cl-store:restore path))))
 
 (defun store-blog-passwords (blog &key (path (blog-password-storage-path blog)))
   (ensure-directories-exist path)
