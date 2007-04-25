@@ -42,7 +42,8 @@
   :licence "BSD"
   :depends-on (:hunchentoot :cl-who :cl-store :md5)
   :components
-  ((:static-file "README")
+  ((:static-file "version" :pathname #p"version.lisp-expr")
+   (:static-file "README")
    (:static-file "LICENSE")
    (:static-file "ChangeLog")
    (:cl-source-file "defpackage")

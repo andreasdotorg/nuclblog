@@ -41,9 +41,14 @@
   ((:module
     :demo
     :components
-    ((:cl-source-file "defpackage")
+    ((:static-file "README")
+     (:cl-source-file "defpackage")
      (:cl-source-file "nuclblog-demo" :depends-on ("defpackage"))
-     (:module "static")
+     (:module "static"
+      :components ((:static-file demoblog-css :pathname #p"demoblog.css")
+                   (:static-file black-css :pathname #p"black.css")
+                   (:static-file white-css :pathname #p"white.css")
+                   (:static-file sbclbutton-png :pathname #p"sbclbutton.png")))
      (:module "log"
       :components ((:static-file "nuclblog-demo-log"
                     :pathname #p"nuclblog-demo.log")))

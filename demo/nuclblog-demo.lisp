@@ -74,12 +74,12 @@
 (setf *dispatch-table*
       (list #'blog::dispatch-blog-handlers
             #'dispatch-easy-handlers
-            (create-folder-dispatcher-and-handler "/nuclblog-css/"
-                                                  (ch-asdf:asdf-lookup-path "asdf:/nuclblog/css"))
-            (create-folder-dispatcher-and-handler "/static/"
-                                                  (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/static"))
-            (create-folder-dispatcher-and-handler "/cl/static/"
-                                                  (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/static"))
+            (create-folder-dispatcher-and-handler
+             "/nuclblog-css/"
+             (ch-asdf:asdf-lookup-path "asdf:/nuclblog/css"))
+            (create-folder-dispatcher-and-handler
+             "/static/"
+             (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/static"))
             #'default-dispatcher))
 
 (defun start-services (&key (port 4242))
