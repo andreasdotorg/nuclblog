@@ -40,7 +40,15 @@
                                (str (blog-entry-title entry)))))
                 (:div :class "entry-date"
                       (:h2 (str (hunchentoot::rfc-1123-date
-                                 (blog-entry-time entry)))))
+                                 (blog-entry-time entry)))
+                           (unless (< (abs (- (blog-entry-time entry)
+                                              (blog-entry-revised-time entry)))
+                                      10)
+                             (htm
+                              " revised at: "
+                              (str (hunchentoot::rfc-1123-date
+                                    (blog-entry-revised-time entry)))))))
+                
                 (let ((user (blog-entry-user entry)))
                   (when user
                     (htm (:div :class "entry-user"
@@ -232,6 +240,9 @@
                  (setf (blog-entry-category entry) category)
                  (setf (blog-entry-title entry) title)
                  (setf (blog-entry-contents entry) content)
+                 (setf (blog-entry-revised-time entry) (get-universal-time))
+                 (let ((path (blog-entry-storage-path blog)))
+                   (when path (store-blog-entries blog path)))
                  (setf edited t))
                (setf edit-error t))))
        (blog::blog-page
