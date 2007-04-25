@@ -80,8 +80,9 @@
   (cl-store:store (blog-entries blog) path))
 
 (defun read-blog-entries (blog &key (path (blog-entry-storage-path blog)))
-  (setf (blog-entries blog)
-        (cl-store:restore path)))
+  (when (probe-file path)
+    (setf (blog-entries blog)
+          (cl-store:restore path))))
 
 (defun create-blog-entry (blog category title contents user
                           &key

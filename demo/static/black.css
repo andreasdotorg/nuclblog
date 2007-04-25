@@ -1,0 +1,48 @@
+
+body {
+  color: #8F8;
+  background-color: #000;
+  font-size: 12px;
+  font-family: sans-serif;
+}
+
+div.box {
+  border: 1px solid;
+}
+
+div.box-body {
+  background: #111;
+}
+
+div.box-head {
+  background: #333;
+}
+
+div.entry {
+  background: #111;
+  border: 1px solid;
+  padding: 3px;
+}
+
+div.entry-head {
+  background: #333;
+  padding: 2px;
+}
+
+div.entry-contents {
+  background: #111;
+}
+
+h1 { color: #4F4; }
+h2 { color: #26F; }
+a { color: #FF0; }
+
+input {
+  background: black;
+  color: #2F2;
+}
+
+textarea {
+  background: black;
+  color: #2F2;
+}

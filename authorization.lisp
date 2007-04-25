@@ -44,7 +44,11 @@
 
 (defmethod set-password ((blog blog) user password)
   (setf (gethash user (blog-passwords blog))
-        (md5:md5sum-sequence (coerce password 'simple-string))))
+        (md5:md5sum-sequence (coerce password 'simple-string)))
+  (store-blog-passwords blog))
+
+(defmethod add-user ((blog blog) user password)
+  (set-password blog user password))
 
 (defmethod check-password ((blog blog) user password)
   (and password

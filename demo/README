@@ -1,0 +1,16 @@
+
+nuclblog-demo
+
+
+To run the demo blog, do the following:
+
+
+(asdf:oos 'asdf:load-op :nuclblog-demo)
+(nuclblog-demo:start-services)
+(nuclblog::add-user nuclblog-demo::*blog* "demo" "demo")
+
+
+This will start up a hunchentoot instance running on port 4242. You'll
+be open to the world if you run it like this, so you might want to
+choose a different password, but that should get you started.
+

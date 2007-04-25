@@ -2,24 +2,30 @@
 nuclblog
 
 Cyrus Harmon
-Sat Apr 21 10:31:24 2007
+Tue Apr 24 22:23:12 2007
 
 nuclblog is a rewrite of Brian Mastenbrook's cl-blog. The main reasons
 for rewriting this are to simplify the code a bit and to support
 hunchentoot (and possibly to use UCW) instead of araneida.
 
-CSS
+To install it you need to do/get the following:
 
-We would like to support arbitrary designs for blog pages using
-CSS. To do so we will emit HTML ids and classes that allow for the
-visual layout to be specified with CSS rules.
+1. Prerequisites:
 
-Main Page:
+  * hunchentoot
+  * cl-who
+  * cl-store
 
-header
-nav
-content
+and for the demo:
 
-box
-box-head
-box-context
+  * ch-asdf
+
+2. Install the nuclblog.asd file
+
+Install the nuclblog.asd file in the usual place .asd
+files go on your system (e.g., /usr/local/lib/sbcl/site-systems)
+
+3. Running the demo
+
+cd to the demo directory and file the directions in demo/README.
+

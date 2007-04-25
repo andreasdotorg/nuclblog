@@ -1,0 +1,33 @@
+body {
+  color: black;
+  font-size: 12px;
+  font-family: sans-serif;
+}
+
+div.box {
+  border: 1px solid;
+}
+
+div.box-body {
+  background: #CCC;
+}
+
+div.box-head {
+  background: #AAA;
+}
+
+div.entry {
+  background: #BBB;
+  border: 1px solid;
+  padding: 3px;
+}
+
+div.entry-head {
+  background: #999;
+  padding: 2px;
+}
+
+div.entry-contents {
+  background: #BBB;
+}
+
