@@ -1,5 +1,5 @@
 PACKAGE=nuclblog
-SYSTEMS=":${PACKAGE}"
+SYSTEMS=":${PACKAGE} :${PACKAGE}-demo"
 
 sbcl --noinform --noprint \
     --eval '(require :asdf)' \

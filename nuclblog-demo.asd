@@ -37,10 +37,14 @@
   :name "nuclblog-demo"
   :author "Cyrus Harmon <ch-lisp@bobobeach.com>"
   :depends-on (:hunchentoot :cl-who :ch-asdf :nuclblog)
-  :components ((:cl-source-file "defpackage")
-               (:cl-source-file "nuclblog-demo" :depends-on ("defpackage"))
-               (:module "static")
-               (:module "log"
-                        :components ((:static-file "nuclblog-demo-log"
-                                                   :pathname #p"nuclblog-demo.log")))
-               (:module "storage")))
+  :components
+  ((:module
+    :demo
+    :components
+    ((:cl-source-file "defpackage")
+     (:cl-source-file "nuclblog-demo" :depends-on ("defpackage"))
+     (:module "static")
+     (:module "log"
+      :components ((:static-file "nuclblog-demo-log"
+                    :pathname #p"nuclblog-demo.log")))
+     (:module "storage")))))

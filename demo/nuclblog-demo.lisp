@@ -62,10 +62,10 @@
                  :url-root "/blog"
                  :entry-storage-path (merge-pathnames
                                       "entries.store"
-                                      (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/storage"))
+                                      (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/storage"))
                  :password-storage-path (merge-pathnames
                                          "passwd.store"
-                                         (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/storage"))
+                                         (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/storage"))
                  :buttons '((:href-url "http://www.sbcl.org/"
                              :id "sbclbutton"
                              :img-url "/static/sbclbutton.png"
@@ -77,13 +77,13 @@
             (create-folder-dispatcher-and-handler "/nuclblog-css/"
                                                   (ch-asdf:asdf-lookup-path "asdf:/nuclblog/css"))
             (create-folder-dispatcher-and-handler "/static/"
-                                                  (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/static"))
+                                                  (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/static"))
             (create-folder-dispatcher-and-handler "/cl/static/"
-                                                  (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/static"))
+                                                  (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/static"))
             #'default-dispatcher))
 
 (defun start-services (&key (port 4242))
   (setf (hunchentoot:log-file)
-        (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/log/nuclblog-demo-log"))
+        (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/log/nuclblog-demo-log"))
   (hunchentoot:start-server :port port))
 
