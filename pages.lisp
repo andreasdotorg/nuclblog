@@ -80,7 +80,7 @@
                  (:li (:a :href (make-archives-url blog i)
                           (str i))
                       " "
-                      (:a :href (archives-url blog :category i :rss t)
+                      (:a :href (make-archives-url blog i :rss t)
                           "(RSS)"))))))))
 
 (defun buttons (blog)

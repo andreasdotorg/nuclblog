@@ -87,7 +87,7 @@
                           (blog-entry-time entry))))
         (:|guid| (str (make-full-entry-url blog entry))))))
 
-  (defun channel-rss (blog &key (limit 10))
+  (defun channel-rss (blog &key (limit 10) category)
     (setf (content-type) "application/rss+xml")
     (with-xml-output-to-string (*standard-output*)
       (htm (:|rss| :|version| 2.0
@@ -96,9 +96,12 @@
                (:|link| (str (make-full-root-url blog)))
                (:|description| (str (blog::blog-subtitle blog)))
                (:|pubDate| (str (hunchentoot::rfc-1123-date)))
-               (loop for entry in (sorted-blog-entries blog)
-                  for i below limit
-                  do (entry-rss blog entry)))))))
+               (loop for entry in
+                    (apply #'sorted-blog-entries blog
+                           (when category
+                             `(:category ,category)))
+                    for i below limit
+                    do (entry-rss blog entry)))))))
   (eval-when (:compile-toplevel :load-toplevel :execute)
     (setf who::*downcase-tags-p* *tag-state*)))
 
@@ -128,8 +131,11 @@
           do (entry-html blog entry)))))
 
   (define-blog-handler (blog :uri "/archives.rss")
-      ((limit :parameter-type 'integer :init-form 10))
-    (channel-rss blog :limit limit))
+      ((limit :parameter-type 'integer :init-form 10)
+       category)
+    (apply #'channel-rss blog :limit limit
+           (when category
+             `(:category ,category))))
 
   (define-blog-handler (blog :uri "/email")
       ()

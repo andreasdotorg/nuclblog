@@ -119,8 +119,25 @@
 (defun get-entry (number blog)
   (find number (blog-entries blog) :key #'blog-entry-number))
 
-(defun sorted-blog-entries (blog)
-  (sort (copy-seq (blog-entries blog))
+(defun get-blog-entries (blog &key category)
+  (cond ((null category)
+         (copy-seq (blog-entries blog)))
+        ((atom category)
+         (remove-if-not (lambda (x)
+                          (equal (blog-entry-category x)
+                                 category))
+                        (blog-entries blog)))
+        ((listp category)
+         (remove-if-not (lambda (x)
+                          (member (blog-entry-category x)
+                                  category
+                                  :test 'equal))
+                        (blog-entries blog)))))
+
+(defun sorted-blog-entries (blog &key category)
+  (sort (apply #'get-blog-entries blog
+               (when category
+                 `(:category ,category)))
         #'>
         :key #'blog-entry-time))
 

@@ -48,9 +48,12 @@
                    (url-encode
                     (princ-to-string (blog-entry-number entry)))))
 
-(defun make-archives-url (blog category)
-  (format nil "~A/archives?category=~A" (blog-url-root blog)
-          (url-encode category)))
+(defun make-archives-url (blog category &key rss)
+  (if rss
+      (format nil "~A/archives.rss?category=~A" (blog-url-root blog)
+              (url-encode category))
+      (format nil "~A/archives?category=~A" (blog-url-root blog)
+              (url-encode category))))
 
 (defmethod blog-new-entry-url ((blog blog))
   (concatenate-url (blog-url-root blog) "/new"))
