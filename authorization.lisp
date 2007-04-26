@@ -30,22 +30,29 @@
 
 (in-package :nuclblog)
 
+(defparameter *password-file-lock* (make-lock "password-file-lock"))
+(defparameter *password-lock* (make-lock "password-lock"))
+
 (defun read-blog-passwords (blog &key (path (blog-password-storage-path blog)))
   (when (probe-file path)
-    (setf (blog-passwords blog)
-          (cl-store:restore path))))
+    (with-lock (*password-file-lock*)
+      (setf (blog-passwords blog)
+            (cl-store:restore path)))))
 
 (defun store-blog-passwords (blog &key (path (blog-password-storage-path blog)))
   (ensure-directories-exist path)
-  (cl-store:store (blog-passwords blog) path))
+  (with-lock (*password-file-lock*)
+    (cl-store:store (blog-passwords blog) path)))
 
 (defmethod get-password-hash ((blog blog) user)
-  (gethash user (blog-passwords blog)))
+  (with-lock (*password-lock*)
+    (gethash user (blog-passwords blog))))
 
 (defmethod set-password ((blog blog) user password)
-  (setf (gethash user (blog-passwords blog))
-        (md5:md5sum-sequence (coerce password 'simple-string)))
-  (store-blog-passwords blog))
+  (with-lock (*password-lock*)
+    (setf (gethash user (blog-passwords blog))
+          (md5:md5sum-sequence (coerce password 'simple-string)))
+    (store-blog-passwords blog)))
 
 (defmethod add-user ((blog blog) user password)
   (set-password blog user password))

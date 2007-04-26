@@ -75,14 +75,19 @@
         (1+ (reduce #'max numbers))
         0)))
 
+(defparameter *entries-file-lock* (hunchentoot::make-lock "entries-file-lock"))
+(defparameter *entries-lock* (hunchentoot::make-lock "entries-lock"))
+
 (defun store-blog-entries (blog path)
   (ensure-directories-exist path)
-  (cl-store:store (blog-entries blog) path))
+  (hunchentoot::with-lock (*entries-file-lock*)
+    (cl-store:store (blog-entries blog) path)))
 
 (defun read-blog-entries (blog &key (path (blog-entry-storage-path blog)))
   (when (probe-file path)
-    (setf (blog-entries blog)
-          (cl-store:restore path))))
+     (hunchentoot::with-lock (*entries-file-lock*)
+       (setf (blog-entries blog)
+             (cl-store:restore path)))))
 
 (defun create-blog-entry (blog category title contents user
                           &key
@@ -96,18 +101,20 @@
                               :time time
                               :revised-time time
                               :contents contents)))
-    (setf (blog-entries blog)
-          (cons entry (blog-entries blog))))
-  (let ((path (blog-entry-storage-path blog)))
-    (when path (store-blog-entries blog path))))
+    (hunchentoot::with-lock (*entries-lock*)
+      (setf (blog-entries blog)
+            (cons entry (blog-entries blog))))
+    (let ((path (blog-entry-storage-path blog)))
+      (when path (store-blog-entries blog path)))))
 
 (defun delete-blog-entry (blog number)
-  (when (find number (blog::blog-entries blog) :key #'blog::blog-entry-number)
-    (setf (blog::blog-entries blog)
-          (delete number (blog::blog-entries blog) :key #'blog::blog-entry-number))
-    (let ((path (blog-entry-storage-path blog)))
-      (when path (store-blog-entries blog path)))
-    t))
+  (hunchentoot::with-lock (*entries-lock*)
+    (when (find number (blog::blog-entries blog) :key #'blog::blog-entry-number)
+      (setf (blog::blog-entries blog)
+            (delete number (blog::blog-entries blog) :key #'blog::blog-entry-number))
+      (let ((path (blog-entry-storage-path blog)))
+        (when path (store-blog-entries blog path)))
+      t)))
 
 (defun get-entry (number blog)
   (find number (blog-entries blog) :key #'blog-entry-number))
