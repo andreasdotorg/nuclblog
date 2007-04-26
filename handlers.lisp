@@ -259,25 +259,26 @@
                  (with-html
                    (:p "Entry editing error!")))
                 (t
-                 (let ((entry (get-entry id blog)))
+                 (let* ((entry (get-entry id blog)))
                    (when entry
-                     (with-html
-                       (:p (:form :method :post
-                                  "Category: "
-                                  (:select :name "category"
-                                           (loop for cat in (blog-categories blog)
-                                              do (if (equal cat category)
-                                                     (htm (:option :selected t :label cat (str cat)))
-                                                     (htm (:option :label cat (str cat))))))
-                                  (:br)
-                                  "Title: "
-                                  (:input :type :text :name "title" :value (blog-entry-title entry))
-                                  (:input :type :hidden :name "id" :value (princ-to-string (blog-entry-number entry)))
-                                  (:br)
-                                  (:textarea :name "content" :rows "20" :cols "60"
-                                             (str (blog-entry-contents entry)))
-                                  (:br)
-                                  (:input :type :submit :value "Submit")))))))))))))
+                     (let ((category (or category (blog-entry-category entry))))
+                       (with-html
+                         (:p (:form :method :post
+                                    "Category: "
+                                    (:select :name "category"
+                                             (loop for cat in (blog-categories blog)
+                                                do (if (equal cat category)
+                                                       (htm (:option :selected t :label cat (str cat)))
+                                                       (htm (:option :label cat (str cat))))))
+                                    (:br)
+                                    "Title: "
+                                    (:input :type :text :name "title" :value (blog-entry-title entry))
+                                    (:input :type :hidden :name "id" :value (princ-to-string (blog-entry-number entry)))
+                                    (:br)
+                                    (:textarea :name "content" :rows "20" :cols "60"
+                                               (str (blog-entry-contents entry)))
+                                    (:br)
+                                    (:input :type :submit :value "Submit"))))))))))))))
 
   (define-blog-handler (blog :uri "/delete")
       ((id :parameter-type 'integer)
