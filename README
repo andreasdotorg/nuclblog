@@ -27,5 +27,19 @@ files go on your system (e.g., /usr/local/lib/sbcl/site-systems)
 
 3. Running the demo
 
-cd to the demo directory and file the directions in demo/README.
+execute the following:
+
+(asdf:oos 'asdf:load-op :nuclblog-demo)
+(nuclblog-demo:start-services)
+(nuclblog::add-user nuclblog-demo::*blog* "demo" "demo")
+
+and you should be ready to go!
+
+4. SSL
+
+To create a new cert:
+
+openssl genrsa -out key.pem 1024      
+openssl req -new -key key.pem -out request.pem
+openssl req -x509 -days 30 -key key.pem -in request.pem -out certificate.pem
 

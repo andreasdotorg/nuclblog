@@ -52,4 +52,9 @@
      (:module "log"
       :components ((:static-file "nuclblog-demo-log"
                     :pathname #p"nuclblog-demo.log")))
+     (:module "ssl"
+      :components ((:static-file "key-pem"
+                    :pathname #p"key.pem")
+                   (:static-file "certificate-pem"
+                    :pathname #p"certificate.pem")))
      (:module "storage")))))

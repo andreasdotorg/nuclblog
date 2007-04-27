@@ -66,7 +66,11 @@
                  :password-storage-path (merge-pathnames
                                          "passwd.store"
                                          (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/storage"))
-                 :buttons '((:href-url "http://www.sbcl.org/"
+                 :buttons '((:href-url "http://weitz.de/hunchentoot/"
+                             :id "hunchentoot-button"
+                             :img-url "/static/hunchentoot10.png"
+                             :alt "hunchentoot")
+                            (:href-url "http://www.sbcl.org/"
                              :id "sbclbutton"
                              :img-url "/static/sbclbutton.png"
                              :alt "(get 'sbcl)"))))
@@ -82,8 +86,15 @@
              (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/static"))
             #'default-dispatcher))
 
-(defun start-services (&key (port 4242))
+(defun start-services (&key (port 4242) (ssl nil))
   (setf (hunchentoot:log-file)
         (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/log/nuclblog-demo-log"))
-  (hunchentoot:start-server :port port))
+  (if ssl
+      (let ((key-file (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/ssl/key-pem"))
+            (cert-file (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/ssl/certificate-pem")))
+        (print (cons key-file cert-file))
+        (hunchentoot:start-server :port port
+                                  :ssl-privatekey-file key-file
+                                  :ssl-certificate-file cert-file))
+      (hunchentoot:start-server :port port)))
 
