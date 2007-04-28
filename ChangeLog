@@ -1,4 +1,85 @@
+2007-04-28  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* authorization.lisp, links.lisp, nuclblog.lisp, pages.lisp, version.lisp-expr:
+	nuclblog 0.2.5
+	 * add use-ssl-p slot to blog
+	 * if use-sll-p, require https for authorized pages
+	 * Main -> Blog
+
+2007-04-27  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* README, demo/nuclblog-demo.lisp, demo/static/hunchentoot10.png, nuclblog-demo.asd, version.lisp-expr:
+	hunchy 0.2.4
+	 * Added preliminary ssl support and README instructions for
+	   generating keys
+	 * Added hunchentoot button
+
+2007-04-26  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* handlers.lisp, links.lisp, nuclblog.lisp, pages.lisp, version.lisp-expr:
+	nuclblog 0.2.3
+	 * preserve category when editing blog entries
+	 * channel-rss now takes category keyword param and does
+	   the right thing with it
+	 * archives.rss handler checks for category and calls
+	   channel-rss with it if present
+	 * make-archives-url now takes an :rss keyword arg
+	 * added get-blog-entries which returns (a copy of)
+	   the blog entries, possibly filted by categor
+	 * sorted-blog-entries no longer copies, as it gets a copy
+	   from get-blog-entries
+	 * fixed RSS URLs
+
+	* handlers.lisp, version.lisp-expr: nuclblog 0.2.2
+	 * preserve category when editing blog entries
+
+	* authorization.lisp, defpackage.lisp, nuclblog.lisp, version.lisp-expr:
+	nuclblog 0.2.1
+	 * sprinkle some locks around the entries and password access and
+	   cl-store store/restore operations.
+
+2007-04-25  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* demo/nuclblog-demo.lisp, nuclblog-demo.asd, nuclblog.asd, version.lisp-expr:
+	nuclblog 0.2
+	 * add missing pieces to the demo asdf file
+	 * add version.lisp-expr to .asdf
+	 * remove /cl/static dispatcher from demo
+
+	* demo/nuclblog-demo.asd, demo/nuclblog-demo.lisp, make-dist.sh, nuclblog-demo.asd, version.lisp-expr:
+	nuclblog 0.1.6
+	 * move demo/nuclblog-demo.asd to nuclblog-demo.asd
+	   and add demo module therein
+	 * fix references to demo/...
+	 * fix make-dist
+
+	* README, authorization.lisp, demo/.cvsignore, demo/README, demo/defpackage.lisp, demo/nuclblog-demo.asd, demo/nuclblog-demo.lisp, demo/start-nuclblog-demo.lisp, demo/start-nuclblog-demo.sh, demo/static/black.css, demo/static/demoblog.css, demo/static/sbclbutton.png, demo/static/white.css, nuclblog.lisp, version.lisp-expr:
+	nuclblog 0.1.5
+	 * adding demo
+	 * work on README and demo/README
+	 * save password file after set-password
+	 * added add-user method
+	 * check for blog-entries file before cl-store:restore call
+
+	* handlers.lisp, version.lisp-expr: hunchy 0.1.4
+	 * add revised at text
+
+	* authorization.lisp, version.lisp-expr: nuclblog 0.1.3
+	 * fix (when (probe-file ...)) bug
+
 2007-04-24  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* pages.lisp, version.lisp-expr: nuclblog 0.1.2
+	 * escape-string the alt tags
+
+	* handlers.lisp, utilities.lisp, version.lisp-expr: nuclblog 0.1.1
+	 * cleaning up (yeah, right...) the who::*downcase-tag-p* bits
+	 * added with-xml macro
+	 * moved channel stuff into channel-rss
+
+	* nuclblog.asd, version.lisp-expr, ChangeLog: nuclblog 0.1
+	 * Added ChangeLog
+	 * bumped the version number
 
 	* links.lisp, version.lisp-expr: nuclblog 0.0.12
 	 * use hunchentoot:ssl-p to decide if we're using http or https for link

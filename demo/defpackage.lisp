@@ -32,4 +32,5 @@
 
 (defpackage #:nuclblog-demo
   (:use #:cl #:hunchentoot #:cl-who)
-  (:export #:start-services))
+  (:export #:start-services
+           #:start-ssl-services))

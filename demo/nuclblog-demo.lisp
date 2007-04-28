@@ -32,8 +32,10 @@
 
 ;;; for debugging
 
-#+nil (setf hunchentoot::*show-lisp-backtraces-p* t)
-#+nil (setf hunchentoot::*show-lisp-errors-p* t)
+#+nil
+(progn
+  (setf hunchentoot::*show-lisp-backtraces-p* t)
+  (setf hunchentoot::*show-lisp-errors-p* t))
 
 (defclass nuclblog-demo-blog (blog:blog)
   ())
@@ -73,7 +75,9 @@
                             (:href-url "http://www.sbcl.org/"
                              :id "sbclbutton"
                              :img-url "/static/sbclbutton.png"
-                             :alt "(get 'sbcl)"))))
+                             :alt "(get 'sbcl)"))
+                 :use-ssl t
+                 :ssl-port 4243))
 
 (setf *dispatch-table*
       (list #'blog::dispatch-blog-handlers
@@ -86,7 +90,7 @@
              (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/static"))
             #'default-dispatcher))
 
-(defun start-services (&key (port 4242) (ssl nil))
+(defun start-services (&key (port (blog::blog-ssl-port *blog*)) (ssl nil))
   (setf (hunchentoot:log-file)
         (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/log/nuclblog-demo-log"))
   (if ssl
@@ -98,3 +102,7 @@
                                   :ssl-certificate-file cert-file))
       (hunchentoot:start-server :port port)))
 
+(defun start-ssl-services (&key (port (blog::blog-ssl-port *blog*)))
+  (setf (blog::blog-use-ssl-p *blog*) t)
+  (setf (blog::blog-ssl-port *blog*) port)
+  (start-services :port port :ssl t))

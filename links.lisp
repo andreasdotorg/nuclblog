@@ -58,11 +58,22 @@
 (defmethod blog-new-entry-url ((blog blog))
   (concatenate-url (blog-url-root blog) "/new"))
 
+(defun parse-host-name-and-port (host-and-port)
+  (let ((strings
+         (nth-value 1
+                    (cl-ppcre:scan-to-strings "^([^:]*)(:([^:]*))?$"
+                                              host-and-port))))
+    (values (elt strings 0)
+            (elt strings 2))))
+
 (defmethod blog-login-url ((blog blog))
   (if (blog-use-ssl-p blog)
-      (concatenate-url "https://"
-                       (host)
-                       (blog-url-root blog) "/login")
+      (multiple-value-bind (host)
+          (parse-host-name-and-port (host))
+        (format nil "https://~A~@[:~A~]~A/login"
+                host
+                (blog-ssl-port blog)
+                (blog-url-root blog)))
       (concatenate-url (blog-url-root blog) "/login")))
 
 (defmethod blog-logout-url ((blog blog))

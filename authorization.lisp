@@ -91,4 +91,8 @@
                            (htm (:input :type :password :name "password")))
                        (:br)
                        (:input :type :submit :value "Submit"))))))
-       (redirect (request-uri) :protocol :https)))
+       (apply #'redirect (request-uri)
+              :protocol :https
+              (let ((port (blog-ssl-port blog)))
+                (when port
+                  `(:port ,port))))))
