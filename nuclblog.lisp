@@ -57,7 +57,8 @@
    (passwords :accessor blog-passwords :initform (make-hash-table :test 'equal))
    (password-storage-path :initarg :password-storage-path
                           :accessor blog-password-storage-path :initform nil)
-   (handler-alist :initarg :handler-alist :accessor blog-handler-alist :initform (list))))
+   (handler-alist :initarg :handler-alist :accessor blog-handler-alist :initform (list))
+   (use-ssl-p :initarg :use-ssl :accessor blog-use-ssl-p :initform nil)))
 
 (defclass blog-entry ()
   ((category :initarg :category :accessor blog-entry-category)

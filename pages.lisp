@@ -102,7 +102,7 @@
   (box (:class "nav-box" :id "nav-box-1")
                (:h2 (str (blog-short-name blog)))
                (:ul
-                (:li (:a :href (blog-url-root blog) "Main"))
+                (:li (:a :href (blog-url-root blog) "Blog"))
                 (:li (:a :href (blog-new-entry-url blog) "New entry"))
                 (:li (:a :href (blog-archives-url blog) "Archives"))
                 (:li (:a :href (archives-url blog :rss t) "Syndicate (RSS)"))

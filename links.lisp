@@ -59,7 +59,11 @@
   (concatenate-url (blog-url-root blog) "/new"))
 
 (defmethod blog-login-url ((blog blog))
-  (concatenate-url (blog-url-root blog) "/login"))
+  (if (blog-use-ssl-p blog)
+      (concatenate-url "https://"
+                       (host)
+                       (blog-url-root blog) "/login")
+      (concatenate-url (blog-url-root blog) "/login")))
 
 (defmethod blog-logout-url ((blog blog))
   (concatenate-url (blog-url-root blog) "/logout"))
