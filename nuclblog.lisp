@@ -35,31 +35,96 @@
 (defgeneric auth-get-password (authenticator user))
 
 (defclass blog ()
-  ((short-name :initarg :short-name :accessor blog-short-name)
-   (title :initarg :title :accessor blog-title)
-   (subtitle :initarg :subtitle :accessor blog-subtitle)
-   (logo-img-url :initarg :logo-img-url :accessor blog-logo-img-url :initform nil)
-   (users :initarg :users :accessor blog-users)
-   (owner-email :initarg :owner-email :accessor blog-owner-email)
-   (blog-links :initarg :blog-links :accessor blog-blog-links :initform nil)
-   (people-links :initarg :people-links :accessor blog-people-links :initform nil)
-   (page-css :initarg :page-css :accessor blog-page-css :initform nil)
-   (categories :initarg :categories :accessor blog-categories :initform nil)
-   (authenticator :initarg :authenticator :accessor blog-authenticator
-		  :initform nil)
-   (allow-html-editor :initarg allow-html-editor :initform nil
-		      :accessor blog-allow-html-editor)
-   (url-root :initarg :url-root :accessor blog-url-root)
-   (buttons :initarg :buttons :accessor blog-buttons :initform (list))
-   (entries :accessor blog-entries :initform (list))
+  ((short-name :initarg :short-name
+               :accessor blog-short-name
+               :documentation "An abbreviated name for this blog.")
+   (title :initarg :title
+          :accessor blog-title
+          :documentation "The title of this blog.")
+   (subtitle :initarg :subtitle
+             :accessor blog-subtitle
+             :documentation "The subtitle of this blog.")
+   (logo-img-url :initarg :logo-img-url
+                 :accessor blog-logo-img-url
+                 :initform nil
+                 :documentation "The URL of the logo for this blog.")
+   (owner-email :initarg :owner-email
+                :accessor blog-owner-email
+                :documentation "The email address of the owner of this
+blog.")
+   (page-css :initarg :page-css
+             :accessor blog-page-css
+             :initform nil
+             :documentation "A URL to the CSS style to load for the
+pages for this blog.")
+   (categories :initarg :categories
+               :accessor blog-categories
+               :initform nil
+               :documentation "A list of the categories of the
+possible categories for entries in this blog.")
+   (url-root :initarg :url-root
+             :accessor blog-url-root
+             :documentation "The URL for the root of this
+blog. Prepended to the suffixes of various blog-related URLs")
+   (buttons :initarg :buttons
+            :accessor blog-buttons
+            :initform nil
+            :documentation "A list of lambda-lists of the form (&key
+href-url id img-url alt) that specifies the the buttons to be
+displayed on blog pages.")
+   (entries :accessor blog-entries
+            :initform nil
+            :documentation "A list of the entries for this blog. This
+should eventually be changed to something more flexible to allow for
+other representations of blog entries.")
    (entry-storage-path :initarg :entry-storage-path
-                       :accessor blog-entry-storage-path :initform nil)
-   (passwords :accessor blog-passwords :initform (make-hash-table :test 'equal))
+                       :accessor blog-entry-storage-path
+                       :initform nil
+                       :documentation "The path to the file to store
+the blog entries. This should be replaced with something more
+flexible.")
+   (passwords :accessor blog-passwords
+              :initform (make-hash-table :test 'equal)
+              :documentation "A hash-table for the users and passwords
+for this blog. The keys are the user names and the values the md5
+hashed password for the user.")
    (password-storage-path :initarg :password-storage-path
-                          :accessor blog-password-storage-path :initform nil)
-   (handler-alist :initarg :handler-alist :accessor blog-handler-alist :initform (list))
-   (use-ssl-p :initarg :use-ssl :accessor blog-use-ssl-p :initform nil)
-   (ssl-port :initarg :ssl-port :accessor blog-ssl-port :initform nil)))
+                          :accessor blog-password-storage-path
+                          :initform nil
+                          :documentation "The path to the file to
+store the password hash-table in.")
+   (handler-alist :initarg :handler-alist
+                  :accessor blog-handler-alist
+                  :initform nil
+                  :documentation "An alist of (URL . function) pairs
+for use by the blog-dispatcher.")
+   (use-ssl-p :initarg :use-ssl
+              :accessor blog-use-ssl-p
+              :initform nil
+              :documentation "If non-nil, use https pages for
+authorized blog pages.")
+   (ssl-port :initarg :ssl-port
+             :accessor blog-ssl-port
+             :initform nil
+             :documentation "If use-ssl-p is non-nil, the port on
+which to use https links. If this is no port is explicitly specified
+and, presumably, the browser will use 443.")
+   ;; unused slots
+   (authenticator :initarg :authenticator
+                  :accessor blog-authenticator
+		  :initform nil
+                  :documentation "(Currently unused) the authenticator
+object for this blog.")
+   (users :initarg :users
+          :accessor blog-users
+          :documentation "(Currently unused) slot for the users of
+this blog.")
+   (blog-links :initarg :blog-links
+               :accessor blog-blog-links
+               :initform nil
+               :documentation "(Currently unused) slot for outgoing
+links for this blog."))
+  (:documentation "Objects of this class represent nuclblog instances."))
 
 (defclass blog-entry ()
   ((category :initarg :category :accessor blog-entry-category)
@@ -105,9 +170,9 @@
                               :contents contents)))
     (hunchentoot::with-lock (*entries-lock*)
       (setf (blog-entries blog)
-            (cons entry (blog-entries blog))))
-    (let ((path (blog-entry-storage-path blog)))
-      (when path (store-blog-entries blog path)))))
+            (cons entry (blog-entries blog)))
+      (let ((path (blog-entry-storage-path blog)))
+        (when path (store-blog-entries blog path))))))
 
 (defun delete-blog-entry (blog number)
   (hunchentoot::with-lock (*entries-lock*)
@@ -119,22 +184,24 @@
       t)))
 
 (defun get-entry (number blog)
-  (find number (blog-entries blog) :key #'blog-entry-number))
+  (hunchentoot::with-lock (*entries-lock*)
+    (find number (blog-entries blog) :key #'blog-entry-number)))
 
 (defun get-blog-entries (blog &key category)
-  (cond ((null category)
-         (copy-seq (blog-entries blog)))
-        ((atom category)
-         (remove-if-not (lambda (x)
-                          (equal (blog-entry-category x)
-                                 category))
-                        (blog-entries blog)))
-        ((listp category)
-         (remove-if-not (lambda (x)
-                          (member (blog-entry-category x)
-                                  category
-                                  :test 'equal))
-                        (blog-entries blog)))))
+  (hunchentoot::with-lock (*entries-lock*)
+    (cond ((null category)
+           (copy-seq (blog-entries blog)))
+          ((atom category)
+           (remove-if-not (lambda (x)
+                            (equal (blog-entry-category x)
+                                   category))
+                          (blog-entries blog)))
+          ((listp category)
+           (remove-if-not (lambda (x)
+                            (member (blog-entry-category x)
+                                    category
+                                    :test 'equal))
+                          (blog-entries blog))))))
 
 (defun sorted-blog-entries (blog &key category)
   (sort (apply #'get-blog-entries blog

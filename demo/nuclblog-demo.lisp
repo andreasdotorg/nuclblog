@@ -90,16 +90,24 @@
              (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/static"))
             #'default-dispatcher))
 
-(defun start-services (&key (port (blog::blog-ssl-port *blog*)) (ssl nil))
+(defun start-services (&key
+                       (ssl nil)
+                       (port (if ssl
+                                 (let ((blog-ssl-port (blog::blog-ssl-port *blog*)))
+                                   (if blog-ssl-port
+                                       blog-ssl-port
+                                       42423)) 
+                                 4242)))
   (setf (hunchentoot:log-file)
         (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/log/nuclblog-demo-log"))
   (if ssl
       (let ((key-file (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/ssl/key-pem"))
             (cert-file (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/ssl/certificate-pem")))
         (print (cons key-file cert-file))
-        (hunchentoot:start-server :port port
-                                  :ssl-privatekey-file key-file
-                                  :ssl-certificate-file cert-file))
+        (hunchentoot:start-server
+               :ssl-privatekey-file key-file
+               :ssl-certificate-file cert-file
+               :port port))
       (hunchentoot:start-server :port port)))
 
 (defun start-ssl-services (&key (port (blog::blog-ssl-port *blog*)))

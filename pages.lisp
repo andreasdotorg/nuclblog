@@ -30,9 +30,6 @@
 
 (in-package :nuclblog)
 
-(defparameter *use-editor* t)
-
-
 (defun entry-link (blog entry)
   (concatenate-url
    (blog-display-entry-url blog)

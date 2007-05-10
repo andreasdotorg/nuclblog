@@ -31,24 +31,37 @@
 (in-package :nuclblog)
 
 (defmacro with-html-page (&body body)
+  "Executes BODY inside a cl-who:wtih-html-output-to-string body,
+directing the output to *standard-output* and setting :prologue to t."
   `(with-html-output-to-string (*standard-output* nil :prologue t)
      ,@body))
 
 (defmacro with-html (&body body)
+  "Executes BODY inside a cl-who:with-html-output body."
   `(with-html-output (*standard-output*)
      ,@body))
 
 (defmacro with-xml-output-to-string ((&optional (stream *standard-output*))
-                           &body body)
+                                     &body body)
+  "Prints the <?xml...?> header to stream and Executes BODY inside of
+a cl-who:with-html-output-to-string block. There is some machinery to
+turn off downcasing of the tags, but I think this doesn't work as I
+intended and should be removed."
   (let ((who::*downcase-tags-p* nil))
     `(with-html-output-to-string (,stream)
        (princ "<?xml version='1.0'?>" ,stream)
        ,@body)))
 
 (defmacro with-xml (&body body)
+  "Executes BODY inside a cl-who:with-html-output body. This is a
+synonym for with-html, but it would be nice if this could
+automatically deal with turning off the tag downcasing, which
+it currently doesn't."
   `(with-html-output (*standard-output*)
      ,@body))
 
 (defun concatenate-url (base &rest strings)
+  "Concatenates strings. In theory, this could be smarter about
+checking validity of URLs, fixing redundant slashes, etc..."
   (apply #'concatenate 'string base strings))
 
