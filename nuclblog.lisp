@@ -222,7 +222,7 @@ links for this blog."))
 (defparameter *blog-dispatch-blogs* nil
   "")
 
-(defun dispatch-blog-handlers (request)
+(defun dispatch-blog-handlers (request &optional vhost)
   "The dispatch function for the blog handlers. This should be added
 to the hunchentoot:*dispatch-table*."
   (loop for blog in *blog-dispatch-blogs*
@@ -259,10 +259,10 @@ specified blog. See define-easy-handler for further details."
                             (blog-handler-alist ,blog)))
            (push (cons ,uri%
                        (lambda (&key ,@(loop for part in lambda-list
-                                          collect (hunchentoot::make-defun-parameter
-                                                   part
-                                                   default-parameter-type
-                                                   default-request-type)))
+                                     collect (hunchentoot::make-defun-parameter
+                                              part
+                                              default-parameter-type
+                                              default-request-type)))
                          ,@body))
                  (blog-handler-alist ,blog)))))))
 

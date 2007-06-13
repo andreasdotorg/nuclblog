@@ -79,6 +79,29 @@
                  :use-ssl t
                  :ssl-port 4243))
 
+#-no-hunchentoot-vhost
+(progn
+
+  (defparameter *localhost-host*
+    (hunchentoot-vhost:make-virtual-host "localhost" '("localhost")))
+
+  (pushnew 'hunchentoot-vhost:dispatch-virtual-host-handlers
+           hunchentoot:*dispatch-table* :test #'equal)
+
+  (pushnew 'nuclblog::dispatch-blog-handlers
+           (hunchentoot-vhost::dispatch-table *localhost-host*) :test #'equal)
+
+  (pushnew (hunchentoot-vhost::create-virtual-host-folder-dispatcher-and-handler
+            "/nuclblog-css/"
+            (ch-asdf:asdf-lookup-path "asdf:/nuclblog/css"))
+           (hunchentoot-vhost::dispatch-table *localhost-host*) :test #'equal)
+
+  (pushnew (hunchentoot-vhost::create-virtual-host-folder-dispatcher-and-handler
+            "/static/"
+            (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/static"))
+           (hunchentoot-vhost::dispatch-table *localhost-host*) :test #'equal))
+
+#+no-hunchentoot-vhost
 (setf *dispatch-table*
       (list #'blog::dispatch-blog-handlers
             #'dispatch-easy-handlers
@@ -96,7 +119,7 @@
                                  (let ((blog-ssl-port (blog::blog-ssl-port *blog*)))
                                    (if blog-ssl-port
                                        blog-ssl-port
-                                       42423)) 
+                                       4243)) 
                                  4242)))
   (setf (hunchentoot:log-file)
         (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/log/nuclblog-demo-log"))
