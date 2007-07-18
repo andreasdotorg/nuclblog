@@ -32,8 +32,6 @@
 
 (defclass authenticator () ())
 
-(defgeneric auth-get-password (authenticator user))
-
 (defclass blog ()
   ((short-name :initarg :short-name
                :accessor blog-short-name
@@ -83,16 +81,11 @@ other representations of blog entries.")
                        :documentation "The path to the file to store
 the blog entries. This should be replaced with something more
 flexible.")
-   (passwords :accessor blog-passwords
-              :initform (make-hash-table :test 'equal)
-              :documentation "A hash-table for the users and passwords
-for this blog. The keys are the user names and the values the md5
-hashed password for the user.")
-   (password-storage-path :initarg :password-storage-path
-                          :accessor blog-password-storage-path
-                          :initform nil
-                          :documentation "The path to the file to
-store the password hash-table in.")
+   (realm :initarg :realm
+          :accessor blog-realm
+          :initform nil
+          :documentation "A realm to manage users and passwords for
+  the blog.")
    (handler-alist :initarg :handler-alist
                   :accessor blog-handler-alist
                   :initform nil
@@ -136,6 +129,18 @@ links for this blog."))
    (contents :initarg :contents :accessor blog-entry-contents)
    (trackbacks :initarg :trackbacks :accessor blog-entry-trackbacks :initform nil)))
 
+(defgeneric read-blog-entries (blog &key path))
+
+(defmethod shared-initialize :after ((blog blog) slot-names &rest initargs)
+  (declare (ignore slot-names initargs))
+  ;; read passwords
+  (when (blog-realm blog)
+    (hunchentoot-auth:read-realm-passwords (blog-realm blog)))
+  ;; read blog entries
+  (blog::read-blog-entries blog)
+  ;; setup the standard blog handlers for this blog
+  (blog:define-blog-handlers blog))
+
 (defun get-next-entry-number (blog)
   (let ((numbers (mapcar #'blog-entry-number (blog-entries blog))))
     (if numbers
@@ -145,13 +150,14 @@ links for this blog."))
 (defparameter *entries-file-lock* (hunchentoot::make-lock "entries-file-lock"))
 (defparameter *entries-lock* (hunchentoot::make-lock "entries-lock"))
 
-(defun store-blog-entries (blog path)
+(defmethod store-blog-entries (blog path)
   (ensure-directories-exist path)
   (hunchentoot::with-lock (*entries-file-lock*)
     (cl-store:store (blog-entries blog) path)))
 
-(defun read-blog-entries (blog &key (path (blog-entry-storage-path blog)))
-  (when (probe-file path)
+(defmethod read-blog-entries (blog &key (path (blog-entry-storage-path blog)))
+  (when (and path
+             (probe-file path))
      (hunchentoot::with-lock (*entries-file-lock*)
        (setf (blog-entries blog)
              (cl-store:restore path)))))

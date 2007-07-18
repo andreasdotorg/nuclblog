@@ -107,7 +107,7 @@
 
 (defun define-blog-handlers (blog)
   "Defines the easy handlers for a given blog."
-  
+
   (define-blog-handler (blog)
       ()
     (blog::blog-page

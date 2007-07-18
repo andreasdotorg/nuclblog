@@ -30,37 +30,11 @@
 
 (in-package :nuclblog)
 
-(defparameter *password-file-lock* (make-lock "password-file-lock"))
-(defparameter *password-lock* (make-lock "password-lock"))
-
-(defun read-blog-passwords (blog &key (path (blog-password-storage-path blog)))
-  (when (probe-file path)
-    (with-lock (*password-file-lock*)
-      (setf (blog-passwords blog)
-            (cl-store:restore path)))))
-
-(defun store-blog-passwords (blog &key (path (blog-password-storage-path blog)))
-  (ensure-directories-exist path)
-  (with-lock (*password-file-lock*)
-    (cl-store:store (blog-passwords blog) path)))
-
-(defmethod get-password-hash ((blog blog) user)
-  (with-lock (*password-lock*)
-    (gethash user (blog-passwords blog))))
-
-(defmethod set-password ((blog blog) user password)
-  (with-lock (*password-lock*)
-    (setf (gethash user (blog-passwords blog))
-          (md5:md5sum-sequence (coerce password 'simple-string)))
-    (store-blog-passwords blog)))
-
 (defmethod add-user ((blog blog) user password)
-  (set-password blog user password))
+  (hunchentoot-auth:add-user (blog-realm blog) user password))
 
 (defmethod check-password ((blog blog) user password)
-  (and password
-       (equalp (get-password-hash blog user)
-               (md5:md5sum-sequence (coerce password 'simple-string)))))
+  (hunchentoot-auth:check-password (blog-realm blog) user password))
 
 (defmacro authorized-page ((user password) &rest body)
   `(if (or (not (blog-use-ssl-p blog))
@@ -91,8 +65,11 @@
                            (htm (:input :type :password :name "password")))
                        (:br)
                        (:input :type :submit :value "Submit"))))))
-       (apply #'redirect (request-uri)
-              :protocol :https
-              (let ((port (blog-ssl-port blog)))
-                (when port
-                  `(:port ,port))))))
+       (progn
+         (apply #'redirect (request-uri)
+                :protocol :https
+                (let ((port (blog-ssl-port blog)))
+                  (when port
+                    (multiple-value-bind (host-name)
+                        (parse-host-name-and-port (host))
+                      `(:host ,host-name :port ,port))))))))

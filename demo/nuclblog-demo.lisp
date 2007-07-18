@@ -40,14 +40,6 @@
 (defclass nuclblog-demo-blog (blog:blog)
   ())
 
-(defmethod shared-initialize :after ((blog nuclblog-demo-blog) slot-names &rest initargs)
-  (declare (ignore initargs))
-  (blog::read-blog-entries blog)
-  (blog::read-blog-passwords blog)
-  
-  ;; setup the standard blog handlers for this blog
-  (blog:define-blog-handlers blog))
-
 (defparameter *blog*
   (make-instance 'nuclblog-demo-blog
                  :short-name "nuclblog demo"
@@ -65,9 +57,12 @@
                  :entry-storage-path (merge-pathnames
                                       "entries.store"
                                       (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/storage"))
-                 :password-storage-path (merge-pathnames
-                                         "passwd.store"
-                                         (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/storage"))
+
+                 :realm
+                 (make-instance 'hunchentoot-auth:realm
+                                :password-storage-path (merge-pathnames
+                                                        "passwd.store"
+                                                        (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/storage")))
                  :buttons '((:href-url "http://weitz.de/hunchentoot/"
                              :id "hunchentoot-button"
                              :img-url "/static/hunchentoot10.png"
