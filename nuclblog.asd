@@ -50,7 +50,6 @@
    (:cl-source-file "utilities":depends-on ("defpackage"))
    (:cl-source-file "nuclblog" :depends-on ("defpackage" "utilities"))
    (:cl-source-file "links" :depends-on ("defpackage" "utilities" "nuclblog"))
-   (:cl-source-file "authorization" :depends-on ("defpackage" "utilities" "nuclblog"))
    (:cl-source-file "pages" :depends-on ("defpackage"
                                          "utilities"
                                          "nuclblog"
@@ -58,7 +57,6 @@
    (:cl-source-file "handlers" :depends-on ("defpackage"
                                             "utilities"
                                             "nuclblog"
-                                            "links"
-                                            "authorization"))
+                                            "links"))
    (:module "css"
             :components ((:static-file nuclblog-css :pathname #p"nuclblog.css")))))

@@ -272,7 +272,6 @@ specified blog. See define-easy-handler for further details."
                          ,@body))
                  (blog-handler-alist ,blog)))))))
 
-
-
-
+(defmethod add-user ((blog blog) user password)
+  (hunchentoot-auth:add-user (blog-realm blog) user password))
 

@@ -60,7 +60,7 @@
           (:div :class "entry-contents"
                 (str (blog-entry-contents entry)))
           (:div :class "entry-nav"
-                (when (session-value 'user-authenticated-p)
+                (when (hunchentoot-auth::session-user-authenticated-p)
                   (htm (:a :href (make-edit-entry-url blog entry) "edit")
                        " "
                        (:a :href (make-delete-entry-url blog entry) "delete")))))))
@@ -104,6 +104,23 @@
                     do (entry-rss blog entry)))))))
   (eval-when (:compile-toplevel :load-toplevel :execute)
     (setf who::*downcase-tags-p* *tag-state*)))
+
+(defun blog-login-page (blog &optional user password)
+  (blog::blog-page
+   blog
+   (format nil "~A: login" (blog-title blog))
+   (lambda ()
+     (if (or user password)
+         (with-html
+           (:p "Login failed. Please try again."))
+         (with-html
+           (:p "Please login:")))
+     (hunchentoot-auth::generate-html-login :user user :password password))))
+
+;;; this only exists for the (deprecated, test) new-browser-auth
+;;; handler. this should go away, quickly...
+(defmethod check-password ((blog blog) user password)
+  (hunchentoot-auth:check-password (blog-realm blog) user password))
 
 (defun define-blog-handlers (blog)
   "Defines the easy handlers for a given blog."
@@ -195,8 +212,10 @@
        title
        (user :init-form (session-value 'user))
        (password))
-    (authorized-page
-     (user password)
+    (hunchentoot-auth::authorized-page
+     ((blog-realm blog) user password
+      :login-page-function (lambda ()
+                             (blog-login-page blog user password)))
      (blog::blog-page
       blog
       (format nil "~A: new entry" (blog-title blog))
@@ -235,8 +254,10 @@
        (user :init-form (session-value 'user))
        (password))
           
-    (authorized-page
-     (user password)
+    (hunchentoot-auth::authorized-page
+     ((blog-realm blog) user password
+      :login-page-function (lambda ()
+                             (blog-login-page blog user password)))
      (let ((edited)
            (edit-error))
        (when (and id content title category)
@@ -290,8 +311,10 @@
       ((id :parameter-type 'integer)
        (user :init-form (session-value 'user))
        (password))
-    (authorized-page
-     (user password)
+    (hunchentoot-auth::authorized-page
+     ((blog-realm blog) user password
+      :login-page-function (lambda ()
+                             (blog-login-page blog user password)))
      (let ((deleted))
        (when id
          (setf deleted (delete-blog-entry blog id)))
@@ -311,8 +334,10 @@
                              :default-request-type :post)
       ((user :init-form (session-value 'user))
        (password))
-    (authorized-page
-     (user password)
+    (hunchentoot-auth::authorized-page
+     ((blog-realm blog) user password
+      :login-page-function (lambda ()
+                             (blog-login-page blog user password)))
      (blog::blog-page
       blog
       (format nil "~A: login" (blog-title blog))
@@ -322,7 +347,7 @@
 
   (define-blog-handler (blog :uri "/logout")
       ()
-    (setf (session-value 'user-authenticated-p) nil)
+    (setf (hunchentoot-auth::session-user-authenticated-p) nil)
     (blog::blog-page
      blog
      (format nil "~A: logout" (blog-title blog))
