@@ -133,9 +133,10 @@ links for this blog."))
 
 (defmethod shared-initialize :after ((blog blog) slot-names &rest initargs)
   (declare (ignore slot-names initargs))
-  ;; read passwords
+  ;; read users and groups
   (when (blog-realm blog)
-    (hunchentoot-auth:read-realm-passwords (blog-realm blog)))
+    (hunchentoot-auth:read-realm-users (blog-realm blog))
+    (hunchentoot-auth:read-realm-groups (blog-realm blog)))
   ;; read blog entries
   (read-blog-entries blog)
   ;; setup the standard blog handlers for this blog
@@ -228,17 +229,15 @@ links for this blog."))
 (defparameter *blog-dispatch-blogs* nil
   "")
 
-(defun dispatch-blog-handlers (request &optional vhost)
+(defun blog-dispatch (request blog)
   "The dispatch function for the blog handlers. This should be added
 to the hunchentoot:*dispatch-table*."
-  (loop for blog in *blog-dispatch-blogs*
+  (loop for (uri . handler) in (blog-handler-alist blog)
+     when (cond ((stringp uri)
+                 (string= (script-name request) uri))
+                (t (funcall uri request)))
      do
-     (loop for (uri . handler) in (blog-handler-alist blog)
-        when (cond ((stringp uri)
-                    (string= (script-name request) uri))
-                   (t (funcall uri request)))
-        do
-        (return-from dispatch-blog-handlers handler))))
+     (return-from blog-dispatch handler)))
 
 (defmacro define-blog-handler (description lambda-list &body body)
   "Like define-easy-handler, except it takes a first argument

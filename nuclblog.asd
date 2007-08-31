@@ -57,6 +57,7 @@
    (:cl-source-file "handlers" :depends-on ("defpackage"
                                             "utilities"
                                             "nuclblog"
-                                            "links"))
+                                            "links"
+                                            "pages"))
    (:module "css"
             :components ((:static-file nuclblog-css :pathname #p"nuclblog.css")))))
