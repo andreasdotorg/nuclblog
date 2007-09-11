@@ -1,3 +1,88 @@
+2007-09-11  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* demo/nuclblog-demo.lisp, handlers.lisp, version.lisp-expr:
+	nuclblog 0.4.5
+	 * use hunchentoot-auth:session-user instead of (ht:session-value 'user)
+	 * remove debugging print
+
+2007-08-31  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* demo/nuclblog-demo.lisp, demo/start-nuclblog-demo.lisp, nuclblog.asd, nuclblog.lisp, pages.lisp, version.lisp-expr:
+	nuclblog 0.4.4
+	 * handlers depends-on pages
+	 * read users and groups instead of just passwords
+	 * dispatch-blog-handlers -> blog-dispatch
+	 * remove nuclblog-demo-blog class
+	 * add initialize-blog function
+	 * break out start-ssl-services
+	 * rework for new hunchentoot-vhost stuff
+
+2007-07-21  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* handlers.lisp, nuclblog.lisp, pages.lisp, version.lisp-expr:
+	nuclblog 0.4.3
+	 * :: -> : where appropriate
+	 * removed spurious blog: and blog:: package prefixes
+
+	* authorization.lisp, handlers.lisp, nuclblog.asd, nuclblog.lisp, pages.lisp, version.lisp-expr:
+	nuclblog 0.4.2
+	 * removed authorization.lisp
+	 * use hunchentoot-auth::session-user-authenticated-p instead of
+	   checking the session value directory
+	 * added blog-login-page
+	 * moved check-password and marked for future deletion
+	 * use hunchentoot-auth::authorized-page instead of authorized-page
+	 * moved add-user method
+
+2007-07-18  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* authorization.lisp, demo/nuclblog-demo.lisp, handlers.lisp, nuclblog.asd, nuclblog.lisp, version.lisp-expr:
+	nuclblog 0.4.1
+	 * removed password-file handling stuff and replaced with
+	   hunchentoot-auth
+	 * added hunchentoot-auth dependencies
+	 * added read-blog-entries defgeneric
+	 * added shared-initialize method for blog to read passwords, read
+	   entires and to set up the standard handlers for the blog
+	 * store-blog-entries and read-blog-entries are now generic functions
+	 * added demo realm
+
+2007-06-13  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* demo/nuclblog-demo.lisp, nuclblog-demo.asd, nuclblog.asd, nuclblog.lisp, version.lisp-expr:
+	nuclblog 0.4
+	 * added hunchentoot-vhost dependency
+	 * dispatch-blog-handlers now takes an optional vhost arg
+	 * whitespace
+	 * add blog-handlers to the vhost dispatch-table instead of *dispatch-table*
+	 * 42423 -> 4243 typo
+
+2007-05-10  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* demo/nuclblog-demo.lisp, nuclblog.lisp, pages.lisp, utilities.lisp, version.lisp-expr:
+	nuclblog 0.3.1
+	 * wrap lines in blog class definition
+	 * fix locking in blog-entry
+	 * add lock in get-entry and get-blog-entries
+	 * remove *use-editor* cruft
+	 * added some docstrings for the html and xml macros
+	 * fixed start services so that it works on 4242/4243 by default
+
+2007-04-28  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* version.lisp-expr: nuclblog 0.3
+	 * bump version to 0.3
+
+	* ChangeLog, authorization.lisp, demo/defpackage.lisp, demo/nuclblog-demo.lisp, demo/start-nuclblog-demo.lisp, links.lisp, nuclblog.lisp, version.lisp-expr:
+	nuclblog 0.2.6
+	 * redirect authorized pages to https if use-ssl-p
+	 * add ssl-port slot to blog
+	 * added parse-host-name-and-port function
+	 * if blog-ssl-port is set and use-ssl-p, add the :<port> to the https
+	   link
+	 * add and export start-ssl-services
+	 * fix the demo to use ssl on port 4243
+
 2007-04-28  Cyrus Harmon  <ch-lisp@bobobeach.com>
 
 	* authorization.lisp, links.lisp, nuclblog.lisp, pages.lisp, version.lisp-expr:

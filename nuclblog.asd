@@ -44,6 +44,7 @@
   :components
   ((:static-file "version" :pathname #p"version.lisp-expr")
    (:static-file "README")
+   (:static-file "NEWS")
    (:static-file "LICENSE")
    (:static-file "ChangeLog")
    (:cl-source-file "defpackage")

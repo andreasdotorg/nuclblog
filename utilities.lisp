@@ -47,7 +47,7 @@ directing the output to *standard-output* and setting :prologue to t."
 a cl-who:with-html-output-to-string block. There is some machinery to
 turn off downcasing of the tags, but I think this doesn't work as I
 intended and should be removed."
-  (let ((who::*downcase-tags-p* nil))
+  (let ((who::*downcase-tokens-p* nil))
     `(with-html-output-to-string (,stream)
        (princ "<?xml version='1.0'?>" ,stream)
        ,@body)))

@@ -65,16 +65,16 @@
                        " "
                        (:a :href (make-delete-entry-url blog entry) "delete")))))))
 
-;;; ugh. who::*downcase-tags-p* needs to be set at compile time. Let's
+;;; ugh. who::*downcase-tokens-p* needs to be set at compile time. Let's
 ;;; try to be polite about how we got about setting this global
 ;;; flag. I wish there a better way to do this...
 
-(defparameter *tag-state* who::*downcase-tags-p*)
+(defparameter *tag-state* who::*downcase-tokens-p*)
 
 (progn
   (eval-when (:compile-toplevel :load-toplevel :execute)
-    (setf *tag-state* who::*downcase-tags-p*)
-    (setf who::*downcase-tags-p* nil))  
+    (setf *tag-state* who::*downcase-tokens-p*)
+    (setf who::*downcase-tokens-p* nil))  
 
   (defun entry-rss (blog entry)
     "Outputs RSS 2.0 for a given blog entry."
@@ -103,7 +103,7 @@
                     for i below limit
                     do (entry-rss blog entry)))))))
   (eval-when (:compile-toplevel :load-toplevel :execute)
-    (setf who::*downcase-tags-p* *tag-state*)))
+    (setf who::*downcase-tokens-p* *tag-state*)))
 
 (defun blog-login-page (blog &optional user password)
   (blog-page
