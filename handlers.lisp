@@ -210,7 +210,7 @@
       (category
        content
        title
-       (user :init-form (session-value 'user))
+       (user :init-form (hunchentoot-auth:session-user))
        (password))
     (hunchentoot-auth:authorized-page
      ((blog-realm blog) user password
@@ -251,7 +251,7 @@
        category
        content
        title
-       (user :init-form (session-value 'user))
+       (user :init-form (hunchentoot-auth:session-user))
        (password))
           
     (hunchentoot-auth:authorized-page
@@ -309,7 +309,7 @@
 
   (define-blog-handler (blog :uri "/delete")
       ((id :parameter-type 'integer)
-       (user :init-form (session-value 'user))
+       (user :init-form (hunchentoot-auth:session-user))
        (password))
     (hunchentoot-auth:authorized-page
      ((blog-realm blog) user password
@@ -332,7 +332,7 @@
   
   (define-blog-handler (blog :uri "/login"
                              :default-request-type :post)
-      ((user :init-form (session-value 'user))
+      ((user :init-form (hunchentoot-auth:session-user))
        (password))
     (hunchentoot-auth:authorized-page
      ((blog-realm blog) user password
@@ -348,6 +348,7 @@
   (define-blog-handler (blog :uri "/logout")
       ()
     (setf (hunchentoot-auth:session-user-authenticated-p) nil)
+    (setf (hunchentoot-auth:session-user) nil)
     (blog-page
      blog
      (format nil "~A: logout" (blog-title blog))

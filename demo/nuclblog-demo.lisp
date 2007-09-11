@@ -120,7 +120,7 @@
   (setf (ht-auth::realm-ssl-port (blog::blog-realm blog)) port)
   (let ((key-file (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/ssl/key-pem"))
         (cert-file (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/ssl/certificate-pem")))
-    (print (cons key-file cert-file))
+    #+nil (print (cons key-file cert-file))
     (let ((ssl-server (hunchentoot:start-server
                        :ssl-privatekey-file key-file
                        :ssl-certificate-file cert-file
