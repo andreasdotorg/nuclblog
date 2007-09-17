@@ -120,7 +120,7 @@
   (setf (ht-auth::realm-ssl-port (blog::blog-realm blog)) port)
   (let ((key-file (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/ssl/key-pem"))
         (cert-file (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/ssl/certificate-pem")))
-    #+nil (print (cons key-file cert-file))
+    (print (list port key-file cert-file))
     (let ((ssl-server (hunchentoot:start-server
                        :ssl-privatekey-file key-file
                        :ssl-certificate-file cert-file
@@ -132,7 +132,7 @@
 (defun start-services (&key
                        (port 4242)
                        (use-ssl t)
-                       (ssl-port 4243))
+                       ssl-port)
   (setf (hunchentoot:log-file)
         (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/log/nuclblog-demo-log"))
   (let ((blog *blog*))
@@ -141,7 +141,9 @@
       (if use-ssl
           (progn
             (setf (blog::blog-use-ssl-p blog) t)
-            (let ((ssl-server (start-ssl-services blog)))
+            (let ((ssl-server (apply #'start-ssl-services blog
+                                     (when ssl-port
+                                       `(:port ,ssl-port)))))
               (values server ssl-server)))
           server))))
 

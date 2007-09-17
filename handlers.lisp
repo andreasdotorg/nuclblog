@@ -169,6 +169,7 @@
            (with-html
              (:p "Please select a blog entry for display."))))))
 
+  #+nil
   (define-blog-handler (blog :uri "/new-browser-auth"
                              :default-request-type :post)
       (category content title)
