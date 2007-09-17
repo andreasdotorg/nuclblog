@@ -30,8 +30,6 @@
 
 (in-package :nuclblog)
 
-(defclass authenticator () ())
-
 (defclass blog ()
   ((short-name :initarg :short-name
                :accessor blog-short-name
@@ -102,16 +100,6 @@ authorized blog pages.")
              :documentation "If use-ssl-p is non-nil, the port on
 which to use https links. If this is no port is explicitly specified
 and, presumably, the browser will use 443.")
-   ;; unused slots
-   (authenticator :initarg :authenticator
-                  :accessor blog-authenticator
-		  :initform nil
-                  :documentation "(Currently unused) the authenticator
-object for this blog.")
-   (users :initarg :users
-          :accessor blog-users
-          :documentation "(Currently unused) slot for the users of
-this blog.")
    (blog-links :initarg :blog-links
                :accessor blog-blog-links
                :initform nil

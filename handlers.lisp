@@ -254,7 +254,6 @@
        title
        (user :init-form (hunchentoot-auth:session-user))
        (password))
-          
     (hunchentoot-auth:authorized-page
      ((blog-realm blog) user password
       :login-page-function (lambda ()
