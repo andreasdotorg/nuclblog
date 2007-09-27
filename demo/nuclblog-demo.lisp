@@ -37,38 +37,39 @@
   (setf hunchentoot::*show-lisp-backtraces-p* t)
   (setf hunchentoot::*show-lisp-errors-p* t))
 
-(defparameter *blog* (make-instance 'blog:blog
-                                    :short-name "nuclblog demo"
-                                    :title "a demo blog for nuclblog"
-                                    :subtitle "witness the awesome power of this fully operational hunchentoot!"
-                                    :logo-img-url "/images/blog-logo.png"
-                                    :owner-email "your_name_here@localhost"
-                                    :page-css (list (cons "demoblog" "/static/demoblog.css"))
-                                    :categories (list "Lisp"
-                                                      "Music"
-                                                      "Food"
-                                                      "Wine"
-                                                      "General")
-                                    :url-root "/blog"
-                                    :entry-storage-path (merge-pathnames
-                                                         "entries.store"
-                                                         (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/storage"))
-                                    :realm
-                                    (make-instance 'hunchentoot-auth:realm
-                                                   :user-storage-path (merge-pathnames
-                                                                       "user.store"
-                                                                       (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/storage"))
-                                                   :group-storage-path (merge-pathnames
-                                                                        "group.store"
-                                                                        (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/storage")))
-                                    :buttons '((:href-url "http://weitz.de/hunchentoot/"
-                                                :id "hunchentoot-button"
-                                                :img-url "/static/hunchentoot10.png"
-                                                :alt "hunchentoot")
-                                               (:href-url "http://www.sbcl.org/"
-                                                :id "sbclbutton"
-                                                :img-url "/static/sbclbutton.png"
-                                                :alt "(get 'sbcl)"))))
+(defparameter *blog*
+  (make-instance 'blog:blog
+                 :short-name "nuclblog demo"
+                 :title "a demo blog for nuclblog"
+                 :subtitle "witness the awesome power of this fully operational hunchentoot!"
+                 :logo-img-url "/images/blog-logo.png"
+                 :owner-email "your_name_here@localhost"
+                 :page-css (list (cons "demoblog" "/static/demoblog.css"))
+                 :categories (list "Lisp"
+                                   "Music"
+                                   "Food"
+                                   "Wine"
+                                   "General")
+                 :url-root "/blog"
+                 :entry-storage-path (merge-pathnames
+                                      "entries.store"
+                                      (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/storage"))
+                 :realm
+                 (make-instance 'hunchentoot-auth:realm
+                                :user-storage-path (merge-pathnames
+                                                    "user.store"
+                                                    (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/storage"))
+                                :group-storage-path (merge-pathnames
+                                                     "group.store"
+                                                     (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/storage")))
+                 :buttons '((:href-url "http://weitz.de/hunchentoot/"
+                             :id "hunchentoot-button"
+                             :img-url "/static/hunchentoot10.png"
+                             :alt "hunchentoot")
+                            (:href-url "http://www.sbcl.org/"
+                             :id "sbclbutton"
+                             :img-url "/static/sbclbutton.png"
+                             :alt "(get 'sbcl)"))))
     
   
 

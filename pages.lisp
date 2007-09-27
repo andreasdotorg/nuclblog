@@ -104,7 +104,7 @@
                 (:li (:a :href (blog-archives-url blog) "Archives"))
                 (:li (:a :href (archives-url blog :rss t) "Syndicate (RSS)"))
                 (:li (:a :href (blog-email-redirect-url blog) "Send Comments"))
-                (if (hunchentoot-auth:session-user-authenticated-p)
+                (if (hunchentoot-auth:session-realm-user-authenticated-p (blog-realm blog))
                     (htm (:li (:a :href (blog-logout-url blog) "Logout")))
                     (htm (:li (:a :href (blog-login-url blog) "Login")))))))
 

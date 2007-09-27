@@ -60,7 +60,7 @@
           (:div :class "entry-contents"
                 (str (blog-entry-contents entry)))
           (:div :class "entry-nav"
-                (when (hunchentoot-auth:session-user-authenticated-p)
+                (when (hunchentoot-auth:session-realm-user-authenticated-p (blog-realm blog))
                   (htm (:a :href (make-edit-entry-url blog entry) "edit")
                        " "
                        (:a :href (make-delete-entry-url blog entry) "delete")))))))
@@ -211,7 +211,7 @@
       (category
        content
        title
-       (user :init-form (hunchentoot-auth:session-user))
+       (user :init-form (hunchentoot-auth:session-realm-user (blog-realm blog)))
        (password))
     (hunchentoot-auth:authorized-page
      ((blog-realm blog) user password
@@ -252,7 +252,7 @@
        category
        content
        title
-       (user :init-form (hunchentoot-auth:session-user))
+       (user :init-form (hunchentoot-auth:session-realm-user (blog-realm blog)))
        (password))
     (hunchentoot-auth:authorized-page
      ((blog-realm blog) user password
@@ -309,7 +309,7 @@
 
   (define-blog-handler (blog :uri "/delete")
       ((id :parameter-type 'integer)
-       (user :init-form (hunchentoot-auth:session-user))
+       (user :init-form (hunchentoot-auth:session-realm-user (blog-realm blog)))
        (password))
     (hunchentoot-auth:authorized-page
      ((blog-realm blog) user password
@@ -332,7 +332,7 @@
   
   (define-blog-handler (blog :uri "/login"
                              :default-request-type :post)
-      ((user :init-form (hunchentoot-auth:session-user))
+      ((user :init-form (hunchentoot-auth:session-realm-user (blog-realm blog)))
        (password))
     (hunchentoot-auth:authorized-page
      ((blog-realm blog) user password
@@ -347,8 +347,8 @@
 
   (define-blog-handler (blog :uri "/logout")
       ()
-    (setf (hunchentoot-auth:session-user-authenticated-p) nil)
-    (setf (hunchentoot-auth:session-user) nil)
+    (setf (hunchentoot-auth:session-realm-user-authenticated-p (blog-realm blog)) nil)
+    (setf (hunchentoot-auth:session-realm-user (blog-realm blog)) nil)
     (blog-page
      blog
      (format nil "~A: logout" (blog-title blog))
