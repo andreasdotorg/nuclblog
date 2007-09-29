@@ -97,16 +97,16 @@
 
 (defun main-nav (blog)
   (box (:class "nav-box" :id "nav-box-1")
-               (:h2 (str (blog-short-name blog)))
-               (:ul
-                (:li (:a :href (blog-url-root blog) "Blog"))
-                (:li (:a :href (blog-new-entry-url blog) "New entry"))
-                (:li (:a :href (blog-archives-url blog) "Archives"))
-                (:li (:a :href (archives-url blog :rss t) "Syndicate (RSS)"))
-                (:li (:a :href (blog-email-redirect-url blog) "Send Comments"))
-                (if (hunchentoot-auth:session-realm-user-authenticated-p (blog-realm blog))
-                    (htm (:li (:a :href (blog-logout-url blog) "Logout")))
-                    (htm (:li (:a :href (blog-login-url blog) "Login")))))))
+       (:h2 (str (blog-short-name blog)))
+       (:ul
+        (:li (:a :href (blog-url-root blog) "Blog"))
+        (:li (:a :href (blog-new-entry-url blog) "New entry"))
+        (:li (:a :href (blog-archives-url blog) "Archives"))
+        (:li (:a :href (archives-url blog :rss t) "Syndicate (RSS)"))
+        (:li (:a :href (blog-email-redirect-url blog) "Send Comments"))
+        (if (hunchentoot-auth:session-realm-user-authenticated-p (blog-realm blog))
+            (htm (:li (:a :href (blog-logout-url blog) "Logout")))
+            (htm (:li (:a :href (blog-login-url blog) "Login")))))))
 
 (defgeneric nav-boxes (blog))
 

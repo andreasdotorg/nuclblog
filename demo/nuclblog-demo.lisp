@@ -30,8 +30,8 @@
 
 (in-package :nuclblog-demo)
 
-;;; for debugging
-
+;;;
+;;; for debugging hunchentoot errors
 #+nil
 (progn
   (setf hunchentoot::*show-lisp-backtraces-p* t)
@@ -73,7 +73,6 @@
     
   
 
-#-no-hunchentoot-vhost
 (defparameter *localhost-host*
   (hunchentoot-vhost:make-virtual-host "localhost"
                                        '("localhost")))
@@ -84,7 +83,6 @@
              (nuclblog::blog-dispatch request blog))
            (hunchentoot-vhost::dispatch-table host) :test #'equal))
 
-#-no-hunchentoot-vhost
 (defun initialize-server (server)
 
   ;; add the virtual host to the server
@@ -105,20 +103,8 @@
             (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/static"))
            (hunchentoot-vhost::dispatch-table *localhost-host*) :test #'equal))
 
-#+no-hunchentoot-vhost
-(setf *dispatch-table*
-      (list #'blog::dispatch-blog-handlers
-            #'dispatch-easy-handlers
-            (create-folder-dispatcher-and-handler
-             "/nuclblog-css/"
-             (ch-asdf:asdf-lookup-path "asdf:/nuclblog/css"))
-            (create-folder-dispatcher-and-handler
-             "/static/"
-             (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/static"))
-            #'default-dispatcher))
 
 (defun start-ssl-services (blog &key (port 4243))
-  (setf (ht-auth::realm-ssl-port (blog::blog-realm blog)) port)
   (let ((key-file (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/ssl/key-pem"))
         (cert-file (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/ssl/certificate-pem")))
     (print (list port key-file cert-file))
