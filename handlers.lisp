@@ -122,71 +122,58 @@
   (hunchentoot-auth:check-password (blog-realm blog) user password))
 
 (defun blog-main (blog)
-  (loop for entry in (sorted-blog-entries blog)
-         for i below 10
-     do (entry-html blog entry)))
-
-(defun blog-status (blog)
-  (if (hunchentoot-auth:session-realm-user-authenticated-p (blog-realm blog))
-      (with-html
-        (:p "Logged in as "
-            (str (hunchentoot-auth:session-realm-user (blog-realm blog)))
-            " to "
-            (str (blog-short-name blog))
-            "."))
-      (with-html
-        (:p "Not Logged in."))))
-
-(defun define-blog-handlers (blog)
-  "Defines the easy handlers for a given blog."
-
-  (define-blog-handler (blog)
-      ()
-    (with-blog-page
+  (with-blog-page
         blog
         (blog-title blog)
-      (blog-main blog)))
-  
-  (define-blog-handler (blog :uri "/archives")
-      (category)
-    (with-blog-page
-        blog
-        (format nil "~A: archives" (blog-title blog))
-      (loop for entry in (sorted-blog-entries blog)
-         when (or (null category)
-                  (equal (blog-entry-category entry)
-                         category))
-         do (entry-html blog entry))))
+    (loop for entry in (sorted-blog-entries blog)
+       for i below 10
+       do (entry-html blog entry))))
 
-  (define-blog-handler (blog :uri "/archives.rss")
-      ((limit :parameter-type 'integer :init-form 10)
-       category)
-    (apply #'channel-rss blog :limit limit
+(defun blog-status (blog)
+  (with-blog-page
+      blog
+      (format nil "~A: status" (blog-title blog))
+    (if (hunchentoot-auth:session-realm-user-authenticated-p (blog-realm blog))
+        (with-html
+          (:p "Logged in as "
+              (str (hunchentoot-auth:session-realm-user (blog-realm blog)))
+              " to "
+              (str (blog-short-name blog))
+              "."))
+        (with-html
+          (:p "Not Logged in.")))))
+
+(defun blog-display (blog &key id)
+  (with-blog-page
+      blog
+      (format nil "~A: display" (blog-title blog))
+    (if (and id (numberp id))
+        (entry-html blog (get-entry id blog))
+        (with-html
+          (:p "Please select a blog entry for display.")))))
+
+(defun blog-archives (blog &key category)
+  (with-blog-page
+      blog
+      (format nil "~A: archives" (blog-title blog))
+    (loop for entry in (sorted-blog-entries blog)
+       when (or (null category)
+                (equal (blog-entry-category entry)
+                       category))
+       do (entry-html blog entry))))
+
+(defun blog-archives-rss (blog &key limit category)
+  (apply #'channel-rss blog :limit limit
            (when category
              `(:category ,category))))
 
-  (define-blog-handler (blog :uri "/email")
-      ()
-    (redirect (format nil "mailto:~A" (blog-owner-email blog)) :permanently t))
-
-  (define-blog-handler (blog :uri "/display")
-      ((id :parameter-type 'integer))
-    (with-blog-page
-        blog
-        (format nil "~A: display" (blog-title blog))
-      (if (and id (numberp id))
-          (entry-html blog (get-entry id blog))
-          (with-html
-            (:p "Please select a blog entry for display.")))))
-
-  (define-blog-handler (blog :uri "/new"
-                             :default-request-type :post)
-      (category
-       content
-       title
-       (user :init-form (hunchentoot-auth:session-realm-user (blog-realm blog)))
-       (password))
-    (hunchentoot-auth:authorized-page
+(defun blog-new (blog &key
+                 category
+                 content
+                 title
+                 user
+                 password)
+  (hunchentoot-auth:authorized-page
      ((blog-realm blog) user password
       :ssl-port (blog-ssl-port blog)
       :login-page-function (lambda ()
@@ -218,15 +205,15 @@
                         (:textarea :name "content" :rows "20" :cols "60" "")
                         (:br)
                         (:input :type :submit :value "Submit"))))))))
-  
-  (define-blog-handler (blog :uri "/edit"
-                             :default-request-type :both)
-      ((id :parameter-type 'integer)
-       category
-       content
-       title
-       (user :init-form (hunchentoot-auth:session-realm-user (blog-realm blog)))
-       (password))
+
+
+(defun blog-edit (blog &key
+                  id
+                  category
+                  content
+                  title
+                  user
+                  password)
     (hunchentoot-auth:authorized-page
      ((blog-realm blog) user password
       :ssl-port (blog-ssl-port blog)
@@ -280,47 +267,45 @@
                                    (:br)
                                    (:input :type :submit :value "Submit")))))))))))))
 
-  (define-blog-handler (blog :uri "/delete")
-      ((id :parameter-type 'integer)
-       (user :init-form (hunchentoot-auth:session-realm-user (blog-realm blog)))
-       (password))
-    (hunchentoot-auth:authorized-page
-     ((blog-realm blog) user password
-      :ssl-port (blog-ssl-port blog)
-      :login-page-function (lambda ()
-                             (blog-login-page blog user password)))
-     (let ((deleted))
-       (when id
-         (setf deleted (delete-blog-entry blog id)))
-       (with-blog-page
-           blog
-           (if (and id deleted)
-               (format nil "~A: delete entry" (blog-title blog))
-               (format nil "~A: error" (blog-title blog)))
-         (if (and id deleted)
-             (with-html
-               (:p "Deleted entry " (str (princ-to-string id))))
-             (with-html
-               (:p "Error deleting entry")))))))
-  
-  (define-blog-handler (blog :uri "/login"
-                             :default-request-type :post)
-      ((user :init-form (hunchentoot-auth:session-realm-user (blog-realm blog)))
-       (password))
-    (hunchentoot-auth:authorized-page
-     ((blog-realm blog) user password
-      :ssl-port (blog-ssl-port blog)
-      :login-page-function (lambda ()
-                             (blog-login-page blog user password)))
+(defun blog-delete (blog &key
+                    id
+                    user
+                    password)
+  (hunchentoot-auth:authorized-page
+   ((blog-realm blog) user password
+    :ssl-port (blog-ssl-port blog)
+    :login-page-function (lambda ()
+                           (blog-login-page blog user password)))
+   (let ((deleted))
+     (when id
+       (setf deleted (delete-blog-entry blog id)))
      (with-blog-page
          blog
-         (format nil "~A: login" (blog-title blog))
-       (with-html
-         (:p "User " (str user) " successfully logged in.")))))
+         (if (and id deleted)
+             (format nil "~A: delete entry" (blog-title blog))
+             (format nil "~A: error" (blog-title blog)))
+       (if (and id deleted)
+           (with-html
+             (:p "Deleted entry " (str (princ-to-string id))))
+           (with-html
+             (:p "Error deleting entry")))))))
 
-  (define-blog-handler (blog :uri "/logout")
-      ()
-    (setf (hunchentoot-auth:session-realm-user-authenticated-p (blog-realm blog)) nil)
+(defun blog-login (blog &key
+                   user
+                   password)
+  (hunchentoot-auth:authorized-page
+   ((blog-realm blog) user password
+    :ssl-port (blog-ssl-port blog)
+    :login-page-function (lambda ()
+                           (blog-login-page blog user password)))
+   (with-blog-page
+       blog
+       (format nil "~A: login" (blog-title blog))
+     (with-html
+       (:p "User " (str user) " successfully logged in.")))))
+
+(defun blog-logout (blog)
+  (setf (hunchentoot-auth:session-realm-user-authenticated-p (blog-realm blog)) nil)
     (setf (hunchentoot-auth:session-realm-user (blog-realm blog)) nil)
     (with-blog-page
         blog
@@ -328,9 +313,62 @@
       (with-html
         (:p "You have successfully logged out."))))
 
-  (define-blog-handler (blog :uri "/status")
+(defun define-blog-handlers (blog)
+  "Defines the easy handlers for a given blog."
+
+  (define-blog-handler-2 (blog)
       ()
-    (with-blog-page
-        blog
-        (format nil "~A: status" (blog-title blog))
-      (blog-status blog))))
+    #'blog-main)
+  
+  (define-blog-handler-2 (blog :uri "/archives")
+      (category)
+    #'blog-archives)
+
+  (define-blog-handler-2 (blog :uri "/archives.rss")
+      ((limit :parameter-type 'integer :init-form 10)
+       category)
+    #'blog-archives-rss)
+
+  (define-blog-handler-2 (blog :uri "/email")
+      ()
+    (lambda (blog)
+      (redirect (format nil "mailto:~A" (blog-owner-email blog)) :permanently t)))
+  
+  (define-blog-handler-2 (blog :uri "/display")
+      ((id :parameter-type 'integer))
+    #'blog-display)
+
+  (define-blog-handler-2 (blog :uri "/new"
+                               :default-request-type :post)
+      (category
+       content
+       title
+       (user :init-form (hunchentoot-auth:session-realm-user (blog-realm blog)))
+       password)
+    #'blog-new)
+  
+  (define-blog-handler-2 (blog :uri "/edit"
+                               :default-request-type :both)
+      ((id :parameter-type 'integer)
+       category
+       content
+       title
+       (user :init-form (hunchentoot-auth:session-realm-user (blog-realm blog)))
+       password)
+    #'blog-edit)
+  
+  (define-blog-handler-2 (blog :uri "/delete")
+      ((id :parameter-type 'integer)
+       (user :init-form (hunchentoot-auth:session-realm-user (blog-realm blog)))
+       password)
+    #'blog-delete)
+  
+  (define-blog-handler-2 (blog :uri "/login"
+                             :default-request-type :post)
+      ((user :init-form (hunchentoot-auth:session-realm-user (blog-realm blog)))
+       password)
+    #'blog-login)
+
+  (define-blog-handler-2 (blog :uri "/logout") () #'blog-logout)
+
+  (define-blog-handler-2 (blog :uri "/status") () #'blog-status))

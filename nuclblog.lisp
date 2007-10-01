@@ -260,12 +260,12 @@ specified blog. See define-easy-handler for further details."
                  (blog-handler-alist ,blog)))))))
 
 (defmacro define-blog-handler-2 (description lambda-list blog-fn)
-  "Like define-easy-handler, except it takes a first argument
-blog. If description is an atom, it is the blog for which the
-handler is to be defined. If it is a list, the first item is the
-blog, followed by the keyword args. The keyword :uri argument in
-the description will be appended to the blog-url-root of the
-specified blog. See define-easy-handler for further details."
+  "Like define-blog-handler, except that instead of providing the body
+of the function directly, a function designator to be funcalled is
+provided instead. This function is then called with the blog as the
+first argument and keyword arguments for each of the parameters in
+lambda-list. Note that the called function need not specify default
+values for the keyword parameters as those are established here."
   (when (atom description)
     (setq description (list description)))
   (destructuring-bind (blog
