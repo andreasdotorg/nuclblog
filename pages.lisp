@@ -150,3 +150,22 @@
             (nav blog)
             (:div :id "content"
                   (funcall body-function)))))))
+
+(defmacro with-blog-page (blog title &body body)
+  `(with-html-page
+     (:html
+      (:head (:title (str ,title))
+             (loop for style in (blog-page-css ,blog)
+                for primary = t then nil
+                do
+                  (htm
+                   (:link :rel (if primary "stylesheet" "alternate stylesheet")
+                          :title (car style) :type "text/css" :href (cdr style)))))
+      (:body
+       (banner ,blog)
+       (:div :id "main"
+             (nav ,blog)
+             (:div :id "content"
+                   (progn
+                     ,@body)))))))
+

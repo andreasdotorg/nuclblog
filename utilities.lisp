@@ -30,6 +30,36 @@
 
 (in-package :nuclblog)
 
+(defmacro with-unique-names ((&rest bindings) &body body)
+  "Syntax: WITH-UNIQUE-NAMES ( { var | (var x) }* ) declaration* form*
+
+Executes a series of forms with each VAR bound to a fresh,
+uninterned symbol. The uninterned symbol is as if returned by a call
+to GENSYM with the string denoted by X - or, if X is not supplied, the
+string denoted by VAR - as argument.
+
+The variable bindings created are lexical unless special declarations
+are specified. The scopes of the name bindings and declarations do not
+include the Xs.
+
+The forms are evaluated in order, and the values of all but the last
+are discarded \(that is, the body is an implicit PROGN)."
+  ;; reference implementation posted to comp.lang.lisp as
+  ;; <cy3bshuf30f.fsf@ljosa.com> by Vebjorn Ljosa - see also
+  ;; <http://www.cliki.net/Common%20Lisp%20Utilities>
+  `(let ,(mapcar #'(lambda (binding)
+                     (check-type binding (or cons symbol))
+                     (if (consp binding)
+                       (destructuring-bind (var x) binding
+                         (check-type var symbol)
+                         `(,var (gensym ,(etypecase x
+                                          (symbol (symbol-name x))
+                                          (character (string x))
+                                          (string x)))))
+                       `(,binding (gensym ,(symbol-name binding)))))
+                 bindings)
+         ,@body))
+
 (defmacro with-html-page (&body body)
   "Executes BODY inside a cl-who:wtih-html-output-to-string body,
 directing the output to *standard-output* and setting :prologue to t."

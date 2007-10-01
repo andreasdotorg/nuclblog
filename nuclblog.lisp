@@ -242,7 +242,7 @@ specified blog. See define-easy-handler for further details."
                        (default-parameter-type ''string)
                        (default-request-type :both))
       description
-    (hunchentoot::with-unique-names (cons uri%)
+    (with-unique-names (cons uri%)
       `(progn
          (pushnew ,blog *blog-dispatch-blogs*)
          (let ((,uri% (concatenate-url (blog-url-root ,blog) ,uri)))
@@ -252,12 +252,58 @@ specified blog. See define-easy-handler for further details."
                             (blog-handler-alist ,blog)))
            (push (cons ,uri%
                        (lambda (&key ,@(loop for part in lambda-list
-                                     collect (hunchentoot::make-defun-parameter
-                                              part
-                                              default-parameter-type
-                                              default-request-type)))
+                                          collect (hunchentoot::make-defun-parameter
+                                                   part
+                                                   default-parameter-type
+                                                   default-request-type)))
                          ,@body))
                  (blog-handler-alist ,blog)))))))
+
+(defmacro define-blog-handler-2 (description lambda-list blog-fn)
+  "Like define-easy-handler, except it takes a first argument
+blog. If description is an atom, it is the blog for which the
+handler is to be defined. If it is a list, the first item is the
+blog, followed by the keyword args. The keyword :uri argument in
+the description will be appended to the blog-url-root of the
+specified blog. See define-easy-handler for further details."
+  (when (atom description)
+    (setq description (list description)))
+  (destructuring-bind (blog
+                       &key
+                       title
+                       uri
+                       (default-parameter-type ''string)
+                       (default-request-type :both))
+      description
+    (let* ((key-arg-list (loop for part in lambda-list
+                            collect (hunchentoot::make-defun-parameter
+                                     part
+                                     default-parameter-type
+                                     default-request-type)))
+           (key-args (mapcar (lambda (arg)
+                               (if (listp arg)
+                                   (car arg)
+                                   arg))
+                             key-arg-list))
+           (key-keywords (mapcar (lambda (arg)
+                                   (hunchentoot::make-keyword
+                                    (symbol-name arg)))
+                                 key-args)))
+      (with-unique-names (cons uri%)
+        `(progn
+           (pushnew ,blog *blog-dispatch-blogs*)
+           (let ((,uri% (concatenate-url (blog-url-root ,blog) ,uri)))
+             (setf (blog-handler-alist ,blog)
+                   (delete-if (lambda (,cons)
+                                (equal ,uri% (car ,cons)))
+                              (blog-handler-alist ,blog)))
+             (push (cons ,uri%
+                         (lambda (&key ,@key-arg-list)
+                           (funcall ,blog-fn blog ,@(mapcan (lambda (x y)
+                                                              (list x y))
+                                                            key-keywords
+                                                            key-args))))
+                   (blog-handler-alist ,blog))))))))
 
 (defmethod add-user ((blog blog) user password)
   (hunchentoot-auth:add-user (blog-realm blog) user password))

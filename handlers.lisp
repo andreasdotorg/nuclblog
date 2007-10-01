@@ -106,46 +106,57 @@
     (setf who::*downcase-tokens-p* *tag-state*)))
 
 (defun blog-login-page (blog &optional user password)
-  (blog-page
-   blog
-   (format nil "~A: login" (blog-title blog))
-   (lambda ()
-     (if (or user password)
-         (with-html
-           (:p "Login failed. Please try again."))
-         (with-html
-           (:p "Please login:")))
-     (hunchentoot-auth:generate-html-login :user user :password password))))
+  (with-blog-page
+      blog
+      (format nil "~A: login" (blog-title blog))
+    (if (or user password)
+        (with-html
+          (:p "Login failed. Please try again."))
+        (with-html
+          (:p "Please login:")))
+    (hunchentoot-auth:generate-html-login :user user :password password)))
 
 ;;; this only exists for the (deprecated, test) new-browser-auth
 ;;; handler. this should go away, quickly...
 (defmethod check-password ((blog blog) user password)
   (hunchentoot-auth:check-password (blog-realm blog) user password))
 
+(defun blog-main (blog)
+  (loop for entry in (sorted-blog-entries blog)
+         for i below 10
+     do (entry-html blog entry)))
+
+(defun blog-status (blog)
+  (if (hunchentoot-auth:session-realm-user-authenticated-p (blog-realm blog))
+      (with-html
+        (:p "Logged in as "
+            (str (hunchentoot-auth:session-realm-user (blog-realm blog)))
+            " to "
+            (str (blog-short-name blog))
+            "."))
+      (with-html
+        (:p "Not Logged in."))))
+
 (defun define-blog-handlers (blog)
   "Defines the easy handlers for a given blog."
 
   (define-blog-handler (blog)
       ()
-    (blog-page
-     blog
-     (blog-title blog)
-     (lambda ()
-       (loop for entry in (sorted-blog-entries blog)
-          for i below 10
-          do (entry-html blog entry)))))
+    (with-blog-page
+        blog
+        (blog-title blog)
+      (blog-main blog)))
   
   (define-blog-handler (blog :uri "/archives")
       (category)
-    (blog-page
-     blog
-     (format nil "~A: archives" (blog-title blog))
-     (lambda ()
-       (loop for entry in (sorted-blog-entries blog)
-          when (or (null category)
-                   (equal (blog-entry-category entry)
-                          category))
-          do (entry-html blog entry)))))
+    (with-blog-page
+        blog
+        (format nil "~A: archives" (blog-title blog))
+      (loop for entry in (sorted-blog-entries blog)
+         when (or (null category)
+                  (equal (blog-entry-category entry)
+                         category))
+         do (entry-html blog entry))))
 
   (define-blog-handler (blog :uri "/archives.rss")
       ((limit :parameter-type 'integer :init-form 10)
@@ -160,51 +171,13 @@
 
   (define-blog-handler (blog :uri "/display")
       ((id :parameter-type 'integer))
-    (blog-page
-     blog
-     (format nil "~A: display" (blog-title blog))
-     (lambda ()
-       (if (and id (numberp id))
-           (entry-html blog (get-entry id blog))
-           (with-html
-             (:p "Please select a blog entry for display."))))))
-
-  #+nil
-  (define-blog-handler (blog :uri "/new-browser-auth"
-                             :default-request-type :post)
-      (category content title)
-    (multiple-value-bind (user password)
-        (authorization)
-      (if (check-password blog user password)
-          (blog-page
-           blog
-           (format nil "~A: new entry" (blog-title blog))
-           (lambda ()
-             (if (and content title category)
-                 (progn
-                   (create-blog-entry blog category title content user)
-                   (with-html
-                     (:p (str (format nil "Created new blog entry by ~A in ~A:"
-                                      user category)))
-                     (:h2 (str title))
-                     (:p (str content))))
-                 (with-html
-                   (:p (:form :method :post
-                              "Category: "
-                              (:select :name "category"
-                                       (loop for cat in (blog-categories blog)
-                                          for selected = t then nil
-                                          do (if selected
-                                                 (htm (:option :selected t :label cat (str cat)))
-                                                 (htm (:option :label cat (str cat))))))
-                              (:br)
-                              "Title: "
-                              (:input :type :text :name "title" (when title (str title)))
-                              (:br)
-                              (:textarea :name "content" :rows "20" :cols "60" "")
-                              (:br)
-                              (:input :type :submit :value "Submit" (when content (str content)))))))))
-          (require-authorization))))
+    (with-blog-page
+        blog
+        (format nil "~A: display" (blog-title blog))
+      (if (and id (numberp id))
+          (entry-html blog (get-entry id blog))
+          (with-html
+            (:p "Please select a blog entry for display.")))))
 
   (define-blog-handler (blog :uri "/new"
                              :default-request-type :post)
@@ -218,34 +191,33 @@
       :ssl-port (blog-ssl-port blog)
       :login-page-function (lambda ()
                              (blog-login-page blog user password)))
-     (blog-page
-      blog
-      (format nil "~A: new entry" (blog-title blog))
-      (lambda ()
-        (if (and content title category)
-            (progn
-              (create-blog-entry blog category title content user)
-              (with-html
-                (:p (str (format nil "Created new blog entry by ~A in ~A:"
-                                 user category)))
-                (:h2 (str title))
-                (:p (str content))))
-            (with-html
-              (:p (:form :method :post
-                         "Category: "
-                         (:select :name "category"
-                                  (loop for cat in (blog-categories blog)
-                                     for selected = t then nil
-                                     do (if selected
-                                            (htm (:option :selected t :label cat (str cat)))
-                                            (htm (:option :label cat (str cat))))))
-                         (:br)
-                         "Title: "
-                         (:input :type :text :name "title" (when title (str title)))
-                         (:br)
-                         (:textarea :name "content" :rows "20" :cols "60" "")
-                         (:br)
-                         (:input :type :submit :value "Submit")))))))))
+     (with-blog-page
+         blog
+         (format nil "~A: new entry" (blog-title blog))
+       (if (and content title category)
+           (progn
+             (create-blog-entry blog category title content user)
+             (with-html
+               (:p (str (format nil "Created new blog entry by ~A in ~A:"
+                                user category)))
+               (:h2 (str title))
+               (:p (str content))))
+           (with-html
+             (:p (:form :method :post
+                        "Category: "
+                        (:select :name "category"
+                                 (loop for cat in (blog-categories blog)
+                                    for selected = t then nil
+                                    do (if selected
+                                           (htm (:option :selected t :label cat (str cat)))
+                                           (htm (:option :label cat (str cat))))))
+                        (:br)
+                        "Title: "
+                        (:input :type :text :name "title" (when title (str title)))
+                        (:br)
+                        (:textarea :name "content" :rows "20" :cols "60" "")
+                        (:br)
+                        (:input :type :submit :value "Submit"))))))))
   
   (define-blog-handler (blog :uri "/edit"
                              :default-request-type :both)
@@ -274,40 +246,39 @@
                    (when path (store-blog-entries blog path)))
                  (setf edited t))
                (setf edit-error t))))
-       (blog-page
-        blog
-        (format nil "~A: edit entry" (blog-title blog))
-        (lambda ()
-          (cond (edited
-                 (with-html
-                   (:p (str (format nil "updated new blog entry by ~A in ~A:"
-                                    user category)))
-                   (:h2 (str title))
-                   (:p (str content))))
-                (edit-error
-                 (with-html
-                   (:p "Entry editing error!")))
-                (t
-                 (let* ((entry (get-entry id blog)))
-                   (when entry
-                     (let ((category (or category (blog-entry-category entry))))
-                       (with-html
-                         (:p (:form :method :post
-                                    "Category: "
-                                    (:select :name "category"
-                                             (loop for cat in (blog-categories blog)
-                                                do (if (equal cat category)
-                                                       (htm (:option :selected t :label cat (str cat)))
-                                                       (htm (:option :label cat (str cat))))))
-                                    (:br)
-                                    "Title: "
-                                    (:input :type :text :name "title" :value (blog-entry-title entry))
-                                    (:input :type :hidden :name "id" :value (princ-to-string (blog-entry-number entry)))
-                                    (:br)
-                                    (:textarea :name "content" :rows "20" :cols "60"
-                                               (str (blog-entry-contents entry)))
-                                    (:br)
-                                    (:input :type :submit :value "Submit"))))))))))))))
+       (with-blog-page
+           blog
+           (format nil "~A: edit entry" (blog-title blog))
+         (cond (edited
+                (with-html
+                  (:p (str (format nil "updated new blog entry by ~A in ~A:"
+                                   user category)))
+                  (:h2 (str title))
+                  (:p (str content))))
+               (edit-error
+                (with-html
+                  (:p "Entry editing error!")))
+               (t
+                (let* ((entry (get-entry id blog)))
+                  (when entry
+                    (let ((category (or category (blog-entry-category entry))))
+                      (with-html
+                        (:p (:form :method :post
+                                   "Category: "
+                                   (:select :name "category"
+                                            (loop for cat in (blog-categories blog)
+                                               do (if (equal cat category)
+                                                      (htm (:option :selected t :label cat (str cat)))
+                                                      (htm (:option :label cat (str cat))))))
+                                   (:br)
+                                   "Title: "
+                                   (:input :type :text :name "title" :value (blog-entry-title entry))
+                                   (:input :type :hidden :name "id" :value (princ-to-string (blog-entry-number entry)))
+                                   (:br)
+                                   (:textarea :name "content" :rows "20" :cols "60"
+                                              (str (blog-entry-contents entry)))
+                                   (:br)
+                                   (:input :type :submit :value "Submit")))))))))))))
 
   (define-blog-handler (blog :uri "/delete")
       ((id :parameter-type 'integer)
@@ -321,17 +292,16 @@
      (let ((deleted))
        (when id
          (setf deleted (delete-blog-entry blog id)))
-       (blog-page
-        blog
-        (if (and id deleted)
-            (format nil "~A: delete entry" (blog-title blog))
-            (format nil "~A: error" (blog-title blog)))
-        (lambda ()
-          (if (and id deleted)
-              (with-html
-                (:p "Deleted entry " (str (princ-to-string id))))
-              (with-html
-                (:p "Error deleting entry"))))))))
+       (with-blog-page
+           blog
+           (if (and id deleted)
+               (format nil "~A: delete entry" (blog-title blog))
+               (format nil "~A: error" (blog-title blog)))
+         (if (and id deleted)
+             (with-html
+               (:p "Deleted entry " (str (princ-to-string id))))
+             (with-html
+               (:p "Error deleting entry")))))))
   
   (define-blog-handler (blog :uri "/login"
                              :default-request-type :post)
@@ -342,20 +312,25 @@
       :ssl-port (blog-ssl-port blog)
       :login-page-function (lambda ()
                              (blog-login-page blog user password)))
-     (blog-page
-      blog
-      (format nil "~A: login" (blog-title blog))
-      (lambda ()
-        (with-html
-          (:p "User " (str user) " successfully logged in."))))))
+     (with-blog-page
+         blog
+         (format nil "~A: login" (blog-title blog))
+       (with-html
+         (:p "User " (str user) " successfully logged in.")))))
 
   (define-blog-handler (blog :uri "/logout")
       ()
     (setf (hunchentoot-auth:session-realm-user-authenticated-p (blog-realm blog)) nil)
     (setf (hunchentoot-auth:session-realm-user (blog-realm blog)) nil)
-    (blog-page
-     blog
-     (format nil "~A: logout" (blog-title blog))
-     (lambda ()
-       (with-html
-         (:p "You have successfully logged out."))))))
+    (with-blog-page
+        blog
+        (format nil "~A: logout" (blog-title blog))
+      (with-html
+        (:p "You have successfully logged out."))))
+
+  (define-blog-handler (blog :uri "/status")
+      ()
+    (with-blog-page
+        blog
+        (format nil "~A: status" (blog-title blog))
+      (blog-status blog))))
