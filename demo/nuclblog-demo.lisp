@@ -78,8 +78,7 @@
                                        '("localhost")))
 
 (defun initialize-blog (blog host)
-  (pushnew (lambda (request &optional vhost)
-             (declare (ignore vhost))
+  (pushnew (lambda (request)
              (nuclblog::blog-dispatch request blog))
            (hunchentoot-vhost::dispatch-table host) :test #'equal))
 
@@ -93,12 +92,12 @@
   ;; call blog-dispatch
   (initialize-blog *blog* *localhost-host*)
     
-  (pushnew (hunchentoot-vhost::create-virtual-host-folder-dispatcher-and-handler
+  (pushnew (hunchentoot::create-folder-dispatcher-and-handler
             "/nuclblog-css/"
             (ch-asdf:asdf-lookup-path "asdf:/nuclblog/css"))
            (hunchentoot-vhost::dispatch-table *localhost-host*) :test #'equal)
 
-  (pushnew (hunchentoot-vhost::create-virtual-host-folder-dispatcher-and-handler
+  (pushnew (hunchentoot::create-folder-dispatcher-and-handler
             "/static/"
             (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/static"))
            (hunchentoot-vhost::dispatch-table *localhost-host*) :test #'equal))

@@ -5,3 +5,8 @@ Now requires cl-who 0.11.0 or later as *downcase-tags-p* ->
 *downcase-tokens-p*.
 
 
+* Changes in 0.3 relative to 0.2
+ ** SSL support
+ ** Bug fixes in handling edit entries
+ ** Fix RSS feed to be channel specific
+ ** add locks to make editing thread-safe
