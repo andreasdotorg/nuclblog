@@ -263,7 +263,7 @@
                                    (:input :type :hidden :name "id" :value (princ-to-string (blog-entry-number entry)))
                                    (:br)
                                    (:textarea :name "content" :rows "20" :cols "60"
-                                              (str (blog-entry-contents entry)))
+                                              (esc (blog-entry-contents entry)))
                                    (:br)
                                    (:input :type :submit :value "Submit")))))))))))))
 
