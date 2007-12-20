@@ -121,10 +121,6 @@ links for this blog."))
 
 (defmethod shared-initialize :after ((blog blog) slot-names &rest initargs)
   (declare (ignore slot-names initargs))
-  ;; read users and groups
-  (when (blog-realm blog)
-    (hunchentoot-auth:read-realm-users (blog-realm blog))
-    (hunchentoot-auth:read-realm-groups (blog-realm blog)))
   ;; read blog entries
   (read-blog-entries blog)
   ;; setup the standard blog handlers for this blog
@@ -136,18 +132,18 @@ links for this blog."))
         (1+ (reduce #'max numbers))
         0)))
 
-(defparameter *entries-file-lock* (hunchentoot::make-lock "entries-file-lock"))
-(defparameter *entries-lock* (hunchentoot::make-lock "entries-lock"))
+(defparameter *entries-file-lock* (hunchentoot-mp:make-lock "entries-file-lock"))
+(defparameter *entries-lock* (hunchentoot-mp:make-lock "entries-lock"))
 
 (defmethod store-blog-entries (blog path)
   (ensure-directories-exist path)
-  (hunchentoot::with-lock (*entries-file-lock*)
+  (hunchentoot-mp:with-lock (*entries-file-lock*)
     (cl-store:store (blog-entries blog) path)))
 
 (defmethod read-blog-entries (blog &key (path (blog-entry-storage-path blog)))
   (when (and path
              (probe-file path))
-     (hunchentoot::with-lock (*entries-file-lock*)
+     (hunchentoot-mp:with-lock (*entries-file-lock*)
        (setf (blog-entries blog)
              (cl-store:restore path)))))
 
@@ -163,14 +159,14 @@ links for this blog."))
                               :time time
                               :revised-time time
                               :contents contents)))
-    (hunchentoot::with-lock (*entries-lock*)
+    (hunchentoot-mp:with-lock (*entries-lock*)
       (setf (blog-entries blog)
             (cons entry (blog-entries blog)))
       (let ((path (blog-entry-storage-path blog)))
         (when path (store-blog-entries blog path))))))
 
 (defun delete-blog-entry (blog number)
-  (hunchentoot::with-lock (*entries-lock*)
+  (hunchentoot-mp:with-lock (*entries-lock*)
     (when (find number (blog-entries blog) :key #'blog-entry-number)
       (setf (blog-entries blog)
             (delete number (blog-entries blog) :key #'blog-entry-number))
@@ -179,11 +175,11 @@ links for this blog."))
       t)))
 
 (defun get-entry (number blog)
-  (hunchentoot::with-lock (*entries-lock*)
+  (hunchentoot-mp:with-lock (*entries-lock*)
     (find number (blog-entries blog) :key #'blog-entry-number)))
 
 (defun get-blog-entries (blog &key category)
-  (hunchentoot::with-lock (*entries-lock*)
+  (hunchentoot-mp:with-lock (*entries-lock*)
     (cond ((null category)
            (copy-seq (blog-entries blog)))
           ((atom category)
@@ -227,50 +223,23 @@ to the hunchentoot:*dispatch-table*."
      do
      (return-from blog-dispatch handler)))
 
-(defmacro define-blog-handler (description lambda-list &body body)
+(defmacro define-blog-handler (description lambda-list blog-fn)
   "Like define-easy-handler, except it takes a first argument
 blog. If description is an atom, it is the blog for which the
 handler is to be defined. If it is a list, the first item is the
 blog, followed by the keyword args. The keyword :uri argument in
 the description will be appended to the blog-url-root of the
-specified blog. See define-easy-handler for further details."
-  (when (atom description)
-    (setq description (list description)))
-  (destructuring-bind (blog
-                       &key
-                       uri
-                       (default-parameter-type ''string)
-                       (default-request-type :both))
-      description
-    (with-unique-names (cons uri%)
-      `(progn
-         (pushnew ,blog *blog-dispatch-blogs*)
-         (let ((,uri% (concatenate-url (blog-url-root ,blog) ,uri)))
-           (setf (blog-handler-alist ,blog)
-                 (delete-if (lambda (,cons)
-                              (equal ,uri% (car ,cons)))
-                            (blog-handler-alist ,blog)))
-           (push (cons ,uri%
-                       (lambda (&key ,@(loop for part in lambda-list
-                                          collect (hunchentoot::make-defun-parameter
-                                                   part
-                                                   default-parameter-type
-                                                   default-request-type)))
-                         ,@body))
-                 (blog-handler-alist ,blog)))))))
+specified blog. See define-easy-handler for further details.
 
-(defmacro define-blog-handler-2 (description lambda-list blog-fn)
-  "Like define-blog-handler, except that instead of providing the body
-of the function directly, a function designator to be funcalled is
-provided instead. This function is then called with the blog as the
-first argument and keyword arguments for each of the parameters in
-lambda-list. Note that the called function need not specify default
-values for the keyword parameters as those are established here."
+A function designator to be funcalled is provided. This function is
+then called with the blog as the first argument and keyword arguments
+for each of the parameters in lambda-list. Note that the called
+function need not specify default values for the keyword parameters as
+those are established here."
   (when (atom description)
     (setq description (list description)))
   (destructuring-bind (blog
                        &key
-                       title
                        uri
                        (default-parameter-type ''string)
                        (default-request-type :both))

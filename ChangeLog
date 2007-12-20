@@ -1,3 +1,79 @@
+2007-10-07  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* handlers.lisp, version.lisp-expr: nuclblog 0.4.14
+
+	 * use esc instead of str so that, e.g. &gt; doesn't get converted to
+	   ">" when editing blog entries.
+
+2007-10-06  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* NEWS, demo/nuclblog-demo.lisp, version.lisp-expr: nuclblog 0.4.13
+
+	 * replaced calls to
+	   hunchentoot-vhost::create-virtual-host-folder-dispatcher-and-handler
+	   with hunchentoot:create-folder-dispatcher-and-handler calls
+	 * update NEWS with some old news
+
+2007-10-01  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* nuclblog.lisp, version.lisp-expr, handlers.lisp: nuclblog 0.4.12
+	 * continue work on define-blog-handler-2
+	 * move handlers to use define-blog-handler-2
+
+	* handlers.lisp, nuclblog.lisp, pages.lisp, utilities.lisp, version.lisp-expr:
+	nuclblog 0.4.11
+	 * deprecate blog-page in favor of with-blog-page
+	 * add blog-main function
+	 * add status handler
+	 * add local copy of with-unique-names and use this one instead of the
+	   one from hunchentoot
+	 * add define-blog-handler-2, which isn't quite right
+	 * add with-blog-page
+
+2007-09-29  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* demo/nuclblog-demo.lisp, handlers.lisp, pages.lisp, version.lisp-expr:
+	nuclblog 0.4.10
+	 * add :ssl-port args to ht-auth::authorized-page forms
+	 * reformat main-nav
+	 * comment fix
+	 * remove #+/-hunchentoot-vhost stuff
+	 * remove realm-ssl-port call
+
+2007-09-27  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* demo/nuclblog-demo.lisp, handlers.lisp, pages.lisp, version.lisp-expr:
+	nuclblog 0.4.8
+	 * use ht-auth:session-realm-... functions
+	 * indentation
+
+2007-09-17  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* file-authenticator.lisp, handlers.lisp, nuclblog.lisp, version.lisp-expr:
+	nuclblog 0.4.8
+	 * remove file-authenticator
+	 * remove authenticator class
+	 * remove authenticator and users slots from blog class
+	 * whitespace
+
+	* demo/nuclblog-demo.lisp, handlers.lisp, version.lisp-expr:
+	nuclblog 0.4.7
+	 * comment out new-browser-auth handler
+	 * fix optional ssl-port startup parameter
+
+2007-09-11  Cyrus Harmon  <ch-lisp@bobobeach.com>
+
+	* ChangeLog, NEWS, handlers.lisp, nuclblog.asd, utilities.lisp, version.lisp-expr:
+	nuclblog 0.4.6
+	 * cl-who:*downcase-tags-p* -> cl-who:*downcase-tokens-p*. Now
+	   requires cl-who 0.11.0 or later.
+	 * added NEWS file
+
+	* demo/nuclblog-demo.lisp, handlers.lisp, version.lisp-expr:
+	nuclblog 0.4.5
+	 * use hunchentoot-auth:session-user instead of (ht:session-value 'user)
+	 * remove debugging print
+
 2007-09-11  Cyrus Harmon  <ch-lisp@bobobeach.com>
 
 	* demo/nuclblog-demo.lisp, handlers.lisp, version.lisp-expr:
