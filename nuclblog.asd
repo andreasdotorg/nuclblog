@@ -28,19 +28,14 @@
 ;;; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;;;
 
-(in-package #:cl-user)
-
-(defpackage #:nuclblog-system (:use #:cl #:asdf))
-(in-package #:nuclblog-system)
-
-(defsystem nuclblog
+(asdf:defsystem nuclblog
   :name "nuclblog"
   :author "Cyrus Harmon <ch-lisp@bobobeach.com>"
   :version #.(with-open-file
                  (vers (merge-pathnames "version.lisp-expr" *load-truename*))
                (read vers))
   :licence "BSD"
-  :depends-on (:hunchentoot :cl-who :cl-store :md5 :hunchentoot-vhost :hunchentoot-auth)
+  :depends-on (:hunchentoot :cl-who :cl-store :md5 :bordeaux-threads :hunchentoot-vhost :hunchentoot-auth)
   :components
   ((:static-file "version" :pathname #p"version.lisp-expr")
    (:static-file "README")

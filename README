@@ -25,23 +25,32 @@ and for the demo:
 Install the nuclblog.asd file in the usual place .asd
 files go on your system (e.g., /usr/local/lib/sbcl/site-systems)
 
-3. Running the demo
+3. SSL
+
+edit demo/ssl/openssl.config and then:
+
+To create a new cert:
+
+cd demo/ssl
+openssl genrsa -out key.pem 1024      
+openssl req -config openssl.config -new -key key.pem -out request.pem
+openssl req -x509 -days 365 -key key.pem -in request.pem -out certificate.pem
+
+4. Running the demo
 
 execute the following:
 
 (asdf:oos 'asdf:load-op :nuclblog-demo)
+
 (nuclblog-demo:start-services)
+
+or
+
+(nuclblog-demo:start-services :use-ssl t)
+
 (nuclblog::add-user nuclblog-demo::*blog* "demo" "demo")
 
 and you should be ready to go!
-
-4. SSL
-
-To create a new cert:
-
-openssl genrsa -out key.pem 1024      
-openssl req -new -key key.pem -out request.pem
-openssl req -x509 -days 365 -key key.pem -in request.pem -out certificate.pem
 
 5. Acknowledgments
 

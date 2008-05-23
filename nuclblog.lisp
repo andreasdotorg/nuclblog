@@ -132,18 +132,18 @@ links for this blog."))
         (1+ (reduce #'max numbers))
         0)))
 
-(defparameter *entries-file-lock* (hunchentoot-mp:make-lock "entries-file-lock"))
-(defparameter *entries-lock* (hunchentoot-mp:make-lock "entries-lock"))
+(defparameter *entries-file-lock* (bt:make-lock "entries-file-lock"))
+(defparameter *entries-lock* (bt:make-lock "entries-lock"))
 
 (defmethod store-blog-entries (blog path)
   (ensure-directories-exist path)
-  (hunchentoot-mp:with-lock (*entries-file-lock*)
+  (bt:with-lock-held (*entries-file-lock*)
     (cl-store:store (blog-entries blog) path)))
 
 (defmethod read-blog-entries (blog &key (path (blog-entry-storage-path blog)))
   (when (and path
              (probe-file path))
-     (hunchentoot-mp:with-lock (*entries-file-lock*)
+     (bt:with-lock-held (*entries-file-lock*)
        (setf (blog-entries blog)
              (cl-store:restore path)))))
 
@@ -159,14 +159,14 @@ links for this blog."))
                               :time time
                               :revised-time time
                               :contents contents)))
-    (hunchentoot-mp:with-lock (*entries-lock*)
+    (bt::with-lock-held (*entries-lock*)
       (setf (blog-entries blog)
             (cons entry (blog-entries blog)))
       (let ((path (blog-entry-storage-path blog)))
         (when path (store-blog-entries blog path))))))
 
 (defun delete-blog-entry (blog number)
-  (hunchentoot-mp:with-lock (*entries-lock*)
+  (bt:with-lock-held (*entries-lock*)
     (when (find number (blog-entries blog) :key #'blog-entry-number)
       (setf (blog-entries blog)
             (delete number (blog-entries blog) :key #'blog-entry-number))
@@ -175,11 +175,11 @@ links for this blog."))
       t)))
 
 (defun get-entry (number blog)
-  (hunchentoot-mp:with-lock (*entries-lock*)
+  (bt:with-lock-held (*entries-lock*)
     (find number (blog-entries blog) :key #'blog-entry-number)))
 
 (defun get-blog-entries (blog &key category)
-  (hunchentoot-mp:with-lock (*entries-lock*)
+  (bt:with-lock-held (*entries-lock*)
     (cond ((null category)
            (copy-seq (blog-entries blog)))
           ((atom category)

@@ -32,7 +32,7 @@
 
 (defpackage #:nuclblog
   (:nicknames #:blog)
-  (:use #:cl #:cl-who #:hunchentoot #:hunchentoot-mp)
+  (:use #:cl #:cl-who #:hunchentoot)
   (:export #:blog
            #:define-blog-handlers
            #:blog-entries))
