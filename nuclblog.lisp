@@ -213,15 +213,23 @@ links for this blog."))
 (defparameter *blog-dispatch-blogs* nil
   "")
 
+(defclass blog-uri-handler ()
+  ((uri :initarg :uri :accessor blog-uri-handler-uri)
+   (handler :initarg :handler :accessor blog-uri-handler-handler)
+   (require-authorization :initarg :require-authorization 
+                          :accessor blog-uri-handler-require-authorization
+                          :initform nil)))
+
 (defun blog-dispatch (request blog)
   "The dispatch function for the blog handlers. This should be added
 to the hunchentoot:*dispatch-table*."
-  (loop for (uri . handler) in (blog-handler-alist blog)
-     when (cond ((stringp uri)
-                 (string= (script-name request) uri))
-                (t (funcall uri request)))
-     do
-     (return-from blog-dispatch handler)))
+  (loop for uri-handler in (blog-handler-alist blog)
+     do (let ((uri (blog-uri-handler-uri uri-handler))
+              (handler (blog-uri-handler-handler uri-handler)))
+          (when (cond ((stringp uri)
+                       (string= (script-name request) uri))
+                      (t (funcall uri request)))
+            (return-from blog-dispatch handler)))))
 
 (defmacro define-blog-handler (description lambda-list blog-fn)
   "Like define-easy-handler, except it takes a first argument
@@ -258,21 +266,81 @@ those are established here."
                                    (hunchentoot::make-keyword
                                     (symbol-name arg)))
                                  key-args)))
-      (with-unique-names (cons uri%)
+      (with-unique-names (uri-handler uri%)
         `(progn
            (pushnew ,blog *blog-dispatch-blogs*)
            (let ((,uri% (concatenate-url (blog-url-root ,blog) ,uri)))
              (setf (blog-handler-alist ,blog)
-                   (delete-if (lambda (,cons)
-                                (equal ,uri% (car ,cons)))
+                   (delete-if (lambda (,uri-handler)
+                                (equal ,uri% (blog-uri-handler-uri ,uri-handler)))
                               (blog-handler-alist ,blog)))
-             (push (cons ,uri%
-                         (lambda (&key ,@key-arg-list)
-                           (funcall ,blog-fn blog ,@(mapcan (lambda (x y)
-                                                              (list x y))
-                                                            key-keywords
-                                                            key-args))))
+             (push (make-instance
+                    'blog-uri-handler
+                    :uri ,uri%
+                    :handler (lambda (&key ,@key-arg-list)
+                               (funcall ,blog-fn ,blog ,@(mapcan (lambda (x y)
+                                                                   (list x y))
+                                                                 key-keywords
+                                                                 key-args))))
                    (blog-handler-alist ,blog))))))))
+
+#+nil
+(defmacro define-authorized-blog-handler (description lambda-list blog-fn)
+  `(define-blog-handler ,description ,lambda-list ,blog-fn))
+
+(defmacro define-authorized-blog-handler (description lambda-list blog-fn)
+  (when (atom description)
+    (setq description (list description)))
+  (destructuring-bind (blog
+                       &key
+                       uri
+                       (default-parameter-type ''string)
+                       (default-request-type :both))
+      description
+    (let* ((key-arg-list (loop for part in lambda-list
+                            collect (hunchentoot::make-defun-parameter
+                                     part
+                                     default-parameter-type
+                                     default-request-type)))
+           (key-args (mapcar (lambda (arg)
+                               (if (listp arg)
+                                   (car arg)
+                                   arg))
+                             key-arg-list))
+           (key-keywords (mapcar (lambda (arg)
+                                   (hunchentoot::make-keyword
+                                    (symbol-name arg)))
+                                 key-args)))
+      (with-unique-names (uri-handler uri%)
+        `(progn
+           (pushnew ,blog *blog-dispatch-blogs*)
+           (flet ((handler ,(cons blog '&key key-args)
+                    (print (cons :user user) *debug-io*)
+                    (print (cons :password password) *debug-io*)
+                    (hunchentoot-auth:authorized-page
+                     ((blog-realm blog) user password
+                      :ssl-port (blog-ssl-port blog)
+                      :login-page-function (lambda ()
+                                             (blog-login-page blog user password)))
+                     (funcall ,blog-fn blog ,@(mapcan (lambda (x y)
+                                                        (list x y))
+                                                      key-keywords
+                                                      key-args)))))
+             (let ((,uri% (concatenate-url (blog-url-root ,blog) ,uri)))
+               (setf (blog-handler-alist ,blog)
+                     (delete-if (lambda (,uri-handler)
+                                  (equal ,uri% (blog-uri-handler-uri ,uri-handler)))
+                                (blog-handler-alist ,blog)))
+               (push (make-instance
+                      'blog-uri-handler
+                      :uri ,uri%
+                      :handler 
+                      (lambda (&key ,@key-arg-list)
+                        (funcall (function handler) blog ,@(mapcan (lambda (x y)
+                                                                     (list x y))
+                                                                   key-keywords
+                                                                   key-args))))
+                     (blog-handler-alist ,blog)))))))))
 
 (defmethod add-user ((blog blog) user password)
   (hunchentoot-auth:add-user (blog-realm blog) user password))
