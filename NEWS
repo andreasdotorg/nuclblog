@@ -1,4 +1,13 @@
 
+Thu Dec 20 09:16:39 2007
+
+* Changes in 0.5 and 0.4 relative to 0.3
+ ** Uses the hunchentoot-vhost package for support for virtual hosts
+    (providing the ability to run multiple services based on the
+    hostname used to access the web service.
+ ** Uses the hunchentoot-auth package to provide user authentication
+    services.
+    
 Tue Sep 11 11:26:11 2007
 
 Now requires cl-who 0.11.0 or later as *downcase-tags-p* ->

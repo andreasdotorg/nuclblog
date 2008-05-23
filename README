@@ -2,11 +2,11 @@
 nuclblog
 
 Cyrus Harmon
-Tue Apr 24 22:23:12 2007
+Thu Dec 20 09:16:27 2007
 
-nuclblog is a rewrite of Brian Mastenbrook's cl-blog. The main reasons
-for rewriting this are to simplify the code a bit and to support
-hunchentoot (and possibly to use UCW) instead of araneida.
+nuclblog is a blog engine written in Common Lisp. nuclblog aims to be
+a clean, relatively lightweight blog engine based on the hunchentoot
+web server.
 
 To install it you need to do/get the following:
 
@@ -51,4 +51,10 @@ or
 (nuclblog::add-user nuclblog-demo::*blog* "demo" "demo")
 
 and you should be ready to go!
+
+5. Acknowledgments
+
+Thanks to Brian Mastenbrook for his cl-blog which served as
+inspiration for this project. Thanks to Edi Weitz for his wonderful
+hunchentoot, cl-who, drakma, among others, projects.
 
