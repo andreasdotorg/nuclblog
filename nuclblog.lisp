@@ -263,7 +263,7 @@ those are established here."
                                    arg))
                              key-arg-list))
            (key-keywords (mapcar (lambda (arg)
-                                   (hunchentoot::make-keyword
+                                   (make-keyword
                                     (symbol-name arg)))
                                  key-args)))
       (with-unique-names (uri-handler uri%)
@@ -308,7 +308,7 @@ those are established here."
                                    arg))
                              key-arg-list))
            (key-keywords (mapcar (lambda (arg)
-                                   (hunchentoot::make-keyword
+                                   (make-keyword
                                     (symbol-name arg)))
                                  key-args)))
       (with-unique-names (uri-handler uri%)

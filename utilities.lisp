@@ -95,3 +95,6 @@ it currently doesn't."
 checking validity of URLs, fixing redundant slashes, etc..."
   (apply #'concatenate 'string base strings))
 
+(defun make-keyword (string)
+  (intern (string-upcase string) :keyword))
+
