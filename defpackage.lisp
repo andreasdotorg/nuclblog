@@ -34,6 +34,11 @@
   (:nicknames #:blog)
   (:use #:cl #:cl-who #:hunchentoot)
   (:export #:blog
+           #:authorized-blog
+
+           #:banner
+           #:footer
+
            #:define-blog-handlers
            #:blog-entries))
 
