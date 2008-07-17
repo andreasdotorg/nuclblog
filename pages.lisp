@@ -122,17 +122,19 @@
           (buttons blog))))
 
 (defun banner (blog)
-  (with-html-output (*standard-output*)
-    (:div :id "banner"                  
-          (let ((url (blog-logo-img-url blog)))
-            (when url
-              (htm (:div :id "bannerleft"
-                        (:img :class "titlelogo" :src url :alt ""))
-                   "&nbsp;")))
-          (:div :id "bannertext"
-                (:h1 (str (blog-title blog)))
-                (:h2 (str (blog-subtitle blog))))
-          (:div :class "pad" "&nbsp;"))))
+  (if (blog-banner blog)
+      (funcall (blog-banner blog))
+      (with-html-output (*standard-output*)
+        (:div :id "banner"                  
+              (let ((url (blog-logo-img-url blog)))
+                (when url
+                  (htm (:div :id "bannerleft"
+                             (:img :class "titlelogo" :src url :alt ""))
+                       "&nbsp;")))
+              (:div :id "bannertext"
+                    (:h1 (str (blog-title blog)))
+                    (:h2 (str (blog-subtitle blog))))
+              (:div :class "pad" "&nbsp;")))))
 
 (defun blog-page (blog title body-function)
   (with-html-page

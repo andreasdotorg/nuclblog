@@ -35,11 +35,17 @@
                :accessor blog-short-name
                :documentation "An abbreviated name for this blog.")
    (title :initarg :title
+          :initform nil
           :accessor blog-title
           :documentation "The title of this blog.")
    (subtitle :initarg :subtitle
              :accessor blog-subtitle
+             :initform nil
              :documentation "The subtitle of this blog.")
+   (banner :initarg :banner
+           :accessor blog-banner
+           :initform nil
+           :documentation "A function to be used as the banner (or NIL).")
    (logo-img-url :initarg :logo-img-url
                  :accessor blog-logo-img-url
                  :initform nil
