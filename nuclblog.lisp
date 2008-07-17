@@ -220,16 +220,46 @@ links for this blog."))
                           :accessor blog-uri-handler-require-authorization
                           :initform nil)))
 
-(defun blog-dispatch (request blog)
-  "The dispatch function for the blog handlers. This should be added
-to the hunchentoot:*dispatch-table*."
-  (loop for uri-handler in (blog-handler-alist blog)
-     do (let ((uri (blog-uri-handler-uri uri-handler))
-              (handler (blog-uri-handler-handler uri-handler)))
-          (when (cond ((stringp uri)
-                       (string= (script-name request) uri))
-                      (t (funcall uri request)))
-            (return-from blog-dispatch handler)))))
+(defgeneric blog-dispatch (request blog)
+  (:documentation "The dispatch (generic) function for the blog
+handlers. This should be added to the hunchentoot:*dispatch-table*.")
+  (:method (request blog)
+    (loop for uri-handler in (blog-handler-alist blog)
+       do (let ((uri (blog-uri-handler-uri uri-handler))
+                (handler (blog-uri-handler-handler uri-handler)))
+            (when (cond ((stringp uri)
+                         (string= (script-name request) uri))
+                        (t (funcall uri request)))
+              (return-from blog-dispatch handler))))))
+
+(defclass authorized-blog (blog)
+  ())
+
+(defparameter *login-page-function* 'ht-auth::login-page)
+
+(defmethod blog-dispatch (request (blog authorized-blog))
+  (declare (optimize (debug 3)))
+  (let ((handler (call-next-method)))
+    (when (and handler (blog-realm blog)) 
+      (let ((realm (blog-realm blog))
+            (user (tbnl:parameter "user"))
+            (password (tbnl:parameter "password")))
+        (if (or (not (blog-use-ssl-p blog)) 
+                (ssl-p))
+            (cond ((ht-auth:session-realm-user-authenticated-p realm)
+                   handler)
+                  ((and user password (ht-auth::check-password realm user password))
+                   (setf (ht-auth:session-realm-user realm) user)
+                   (setf (ht-auth:session-realm-user-authenticated-p realm) t)
+                   handler)
+                  (t *login-page-function*))
+            (progn
+              (apply #'redirect (request-uri request)
+                     :protocol :https
+                     (when (blog-ssl-port blog) 
+                       (multiple-value-bind (host-name)
+                           (parse-host-name-and-port (host request))
+                         `(:host ,host-name :port ,(blog-ssl-port blog)))))))))))
 
 (defmacro define-blog-handler (description lambda-list blog-fn)
   "Like define-easy-handler, except it takes a first argument
