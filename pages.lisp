@@ -139,10 +139,9 @@
     (:html
      (:head (:title (str title))
             (loop for style in (blog-page-css blog)
-               for primary = t then nil
                do
                (htm
-                (:link :rel (if primary "stylesheet" "alternate stylesheet")
+                (:link :rel "stylesheet"
                        :title (car style) :type "text/css" :href (cdr style)))))
      (:body
       (banner blog)
@@ -156,10 +155,9 @@
      (:html
       (:head (:title (str ,title))
              (loop for style in (blog-page-css ,blog)
-                for primary = t then nil
                 do
                   (htm
-                   (:link :rel (if primary "stylesheet" "alternate stylesheet")
+                   (:link :rel "stylesheet"
                           :title (car style) :type "text/css" :href (cdr style)))))
       (:body
        (banner ,blog)
