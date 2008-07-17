@@ -46,6 +46,10 @@
            :accessor blog-banner
            :initform nil
            :documentation "A function to be used as the banner (or NIL).")
+   (footer :initarg :footer
+           :accessor blog-footer
+           :initform nil
+           :documentation "A function to be used as the footer (or NIL).")
    (logo-img-url :initarg :logo-img-url
                  :accessor blog-logo-img-url
                  :initform nil
