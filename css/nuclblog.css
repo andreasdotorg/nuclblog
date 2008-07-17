@@ -1,46 +1,45 @@
-body { }
 
-div#banner {
+div#nuclblog-banner {
   top: 0px;
   text-align: center;
 }
 
-div#nav {
+div#nuclblog-nav {
   float: left;
   width: 180px;
   margin-top: 6px;
 }
 
-div#content {
+div#nuclblog-content {
   padding-top: 12px;
   margin-top: 0px;
   margin-left: 185px;
 }
 
-div.box {
+div[class~="nuclblog-box"] {
   margin: 6px;
 }
 
-div.box-body {
+div[class~="nuclblog-box-body"] {
   padding: 1px 2px 6px 0px;
   margin: 0px;
 }
 
-div.box-head {
+div[class~="nuclblog-box-head"] {
   padding: 2px 6px 2px 6px;
 }
 
-div.nav-button {
+div[class~="nuclblog-nav-button"] {
   margin: 6px;
   padding: 0px;
 }
 
-div.nav-button > div.box-head {
+div[class~="nuclblog-nav-button"] > div[class~="nuclblog-box-head"] {
   padding: 1px;
   margin: 1px;
 }
 
-div.nav-button > div.box-body {
+div[class~="nuclblog-nav-button"] > div[class~="nuclblog-box-body"] {
   padding: 2px;
 }
 
@@ -48,30 +47,30 @@ ul {
   margin-left: 12px;
 }
 
-ul.recent-entries {
+ul[class~="nuclblog-recent-entries"] {
 }
 
-ul.buttons {
+ul[class~="nuclblog-buttons"] {
   margin: 2px 0px 0px 0px;
   list-style-type: none;
 }
 
-a.button, a.button > img {
+a[class~="nuclblog-button"], a[class~="nuclblog-button"] > img {
   border: none;
 }
 
-div.entry {
+div[class~="nuclblog-entry"] {
   margin-bottom: 12px;
   padding: 0px;
 }
 
-div.entry-head { }
+div[class~="nuclblog-entry-head"] { }
 
-div.entry-title { }
+div[class~="nuclblog-entry-title"] { }
 
-div.entry-date { }
+div[class~="nuclblog-entry-date"] { }
 
-div.entry-text { }
+div[class~="nuclblog-entry-text"] { }
 
-div.entry-contents { }
+div[class~="nuclblog-entry-contents"] { }
 

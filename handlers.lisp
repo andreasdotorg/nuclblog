@@ -33,12 +33,12 @@
 (defun entry-html (blog entry)
   "Outputs html for a blog entry."
   (with-html
-    (:div :class "entry"
-          (:div :class "entry-head"
-                (:div :class "entry-title"
+    (:div :class "nuclblog-entry"
+          (:div :class "nuclblog-entry-head"
+                (:div :class "nuclblog-entry-title"
                       (:h1 (:a :href (make-entry-url blog entry)
                                (str (blog-entry-title entry)))))
-                (:div :class "entry-date"
+                (:div :class "nuclblog-entry-date"
                       (:h2 (str (hunchentoot::rfc-1123-date
                                  (blog-entry-time entry)))
                            (unless (< (abs (- (blog-entry-time entry)
@@ -51,15 +51,15 @@
                 
                 (let ((user (blog-entry-user entry)))
                   (when user
-                    (htm (:div :class "entry-user"
+                    (htm (:div :class "nuclblog-entry-user"
                                (:h3 "posted by " (str user)
                                     " in " (:a :href
                                                (make-archives-url
                                                 blog (blog-entry-category entry))
                                                (str (blog-entry-category entry)))))))))
-          (:div :class "entry-contents"
+          (:div :class "nuclblog-entry-contents"
                 (str (blog-entry-contents entry)))
-          (:div :class "entry-nav"
+          (:div :class "nuclblog-entry-nav"
                 (when (hunchentoot-auth:session-realm-user-authenticated-p (blog-realm blog))
                   (htm (:a :href (make-edit-entry-url blog entry) "edit")
                        " "
