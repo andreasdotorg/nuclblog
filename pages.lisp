@@ -48,18 +48,18 @@
 
 (defmacro box ((&key class id) head &rest body)
   `(with-html-output (*standard-output*)
-     (:div :id ,id :class ,(concatenate 'string "box " class)
+     (:div :id ,id :class ,(concatenate 'string "nuclblog-box " class)
            ,(when head
-                  `(:div :class "box-head"
+                  `(:div :class "nuclblog-box-head"
                          ,head))
-           (:div :class "box-body"
+           (:div :class "nuclblog-box-body"
                  ,@body))))
 
 (defun recent-entries (blog)
   (with-html
-    (box (:class "nav-box" :id "nav-box-recent-entries")
+    (box (:class "nuclblog-nav-box" :id "nuclblog-nav-box-recent-entries")
          (:h2 "Recent entries")
-         (:ul :class "recent-entries"
+         (:ul :class "nuclblog-recent-entries"
               (loop for i from 1 to 10
                  for j in (blog-entries blog)
                  do (htm
@@ -69,7 +69,7 @@
 
 (defun categories (blog)
   (with-html
-    (box (:class "nav-box" :id "nav-box-categories")
+    (box (:class "nuclblog-nav-box" :id "nuclblog-nav-box-categories")
          (:h2 "Categories")
          (:ul
           (loop for i in (blog-categories blog)
@@ -82,21 +82,21 @@
 
 (defun buttons (blog)
   (with-html
-    (box (:class "nav-box nav-button" :id "nav-box-buttons")
+    (box (:class "nuclblog-nav-box nav-button" :id "nuclblog-nav-box-buttons")
          nil
-         (:ul :class "buttons"
+         (:ul :class "nuclblog-buttons"
               (loop for button in (blog-buttons blog)
                  do
                  (destructuring-bind (&key href-url id img-url alt) button
                    (htm
                     (:li
-                     (:a :href href-url :class "button"
+                     (:a :href href-url :class "nuclblog-button"
                          (:img :id id
                                :src img-url
                                :alt (escape-string alt)))))))))))
 
 (defun main-nav (blog)
-  (box (:class "nav-box" :id "nav-box-1")
+  (box (:class "nuclblog-nav-box" :id "nuclblog-nav-box-1")
        (:h2 (str (blog-short-name blog)))
        (:ul
         (:li (:a :href (blog-url-root blog) "Blog"))
@@ -117,22 +117,22 @@
 
 (defun nav (blog)
   (with-html-output (*standard-output*)
-    (:div :id "nav" :class "nav"
+    (:div :id "nuclblog-nav" :class "nuclblog-nav"
           (nav-boxes blog)
           (buttons blog))))
 
 (defun banner (blog)
   (with-html-output (*standard-output*)
-    (:div :id "banner"                  
+    (:div :id "nuclblog-banner"                  
           (let ((url (blog-logo-img-url blog)))
             (when url
-              (htm (:div :id "bannerleft"
-                        (:img :class "titlelogo" :src url :alt ""))
+              (htm (:div :id "nuclblog-bannerleft"
+                        (:img :class "nuclblog-titlelogo" :src url :alt ""))
                    "&nbsp;")))
-          (:div :id "bannertext"
+          (:div :id "nuclblog-bannertext"
                 (:h1 (str (blog-title blog)))
                 (:h2 (str (blog-subtitle blog))))
-          (:div :class "pad" "&nbsp;"))))
+          (:div :class "nuclblog-pad" "&nbsp;"))))
 
 (defun blog-page (blog title body-function)
   (with-html-page
@@ -145,9 +145,9 @@
                        :title (car style) :type "text/css" :href (cdr style)))))
      (:body
       (banner blog)
-      (:div :id "main"
+      (:div :id "nuclblog-main"
             (nav blog)
-            (:div :id "content"
+            (:div :id "nuclbllog-content"
                   (funcall body-function)))))))
 
 (defmacro with-blog-page (blog title &body body)
@@ -161,9 +161,9 @@
                           :title (car style) :type "text/css" :href (cdr style)))))
       (:body
        (banner ,blog)
-       (:div :id "main"
+       (:div :id "nuclblog-main"
              (nav ,blog)
-             (:div :id "content"
+             (:div :id "nuclblog-content"
                    (progn
                      ,@body)))))))
 
