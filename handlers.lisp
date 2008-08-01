@@ -178,7 +178,7 @@
                  user
                  password)
   (hunchentoot-auth:authorized-page
-     ((blog-realm blog) user password
+     ((blog-realm blog)
       :ssl-port (blog-ssl-port blog)
       :login-page-function (lambda ()
                              (blog-login-page blog user password)))
@@ -219,7 +219,7 @@
                   user
                   password)
     (hunchentoot-auth:authorized-page
-     ((blog-realm blog) user password
+     ((blog-realm blog)
       :ssl-port (blog-ssl-port blog)
       :login-page-function (lambda ()
                              (blog-login-page blog user password)))
@@ -276,7 +276,7 @@
                     user
                     password)
   (hunchentoot-auth:authorized-page
-   ((blog-realm blog) user password
+   ((blog-realm blog)
     :ssl-port (blog-ssl-port blog)
     :login-page-function (lambda ()
                            (blog-login-page blog user password)))
@@ -294,11 +294,9 @@
            (with-html
              (:p "Error deleting entry")))))))
 
-(defun blog-login (blog &key
-                   user
-                   password)
+(defun blog-login (blog &key user password)
   (hunchentoot-auth:authorized-page
-   ((blog-realm blog) user password
+   ((blog-realm blog)
     :ssl-port (blog-ssl-port blog)
     :login-page-function (lambda ()
                            (blog-login-page blog user password)))
