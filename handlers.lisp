@@ -336,7 +336,7 @@
   (define-blog-handler (blog :uri "/email")
       ()
     (lambda (blog)
-      (redirect (format nil "mailto:~A" (blog-owner-email blog)) :permanently t)))
+      (redirect (format nil "mailto:~A" (blog-owner-email blog)))))
   
   (define-blog-handler (blog :uri "/display")
       ((id :parameter-type 'integer))
