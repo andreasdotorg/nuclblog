@@ -88,7 +88,7 @@
         (:|guid| (str (make-full-entry-url blog entry))))))
 
   (defun channel-rss (blog &key (limit 10) category)
-    (setf (content-type) "application/rss+xml")
+    (setf (content-type*) "application/rss+xml")
     (with-xml-output-to-string (*standard-output*)
       (htm (:|rss| :|version| 2.0
              (:|channel|
