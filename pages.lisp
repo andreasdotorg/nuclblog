@@ -140,7 +140,7 @@
 
 (defun blog-page (blog title body-function)
   (with-html-page
-    (:html
+    ((:html :xmlns "http://www.w3.org/1999/xhtml")
      (:head (:title (str title))
             (loop for style in (blog-page-css blog)
                do
@@ -157,7 +157,7 @@
 
 (defmacro with-blog-page (blog title &body body)
   `(with-html-page
-     (:html
+     ((:html :xmlns "http://www.w3.org/1999/xhtml") 
       (:head (:title (str ,title))
              (loop for style in (blog-page-css ,blog)
                 do
