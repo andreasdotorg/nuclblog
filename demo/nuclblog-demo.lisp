@@ -53,15 +53,15 @@
                  :url-root "/blog"
                  :entry-storage-path (merge-pathnames
                                       "entries.store"
-                                      (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/storage"))
+                                      (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo-data/demo/storage"))
                  :realm
                  (make-instance 'hunchentoot-auth:realm
                                 :user-storage-path (merge-pathnames
                                                     "user.store"
-                                                    (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/storage"))
+                                                    (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo-data/demo/storage"))
                                 :group-storage-path (merge-pathnames
                                                      "group.store"
-                                                     (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/storage")))
+                                                     (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo-data/demo/storage")))
                  :buttons '((:href-url "http://weitz.de/hunchentoot/"
                              :id "hunchentoot-button"
                              :img-url "/static/hunchentoot10.png"
@@ -75,12 +75,13 @@
 
 (defparameter *localhost-host*
   (hunchentoot-vhost:make-virtual-host "localhost"
-                                       '("localhost")))
+                                       '("localhost"
+                                         "127.0.0.1")))
 
 (defun initialize-blog (blog host)
   (pushnew (lambda (request)
              (nuclblog::blog-dispatch request blog))
-           (hunchentoot-vhost::dispatch-table host) :test #'equal))
+           (hunchentoot-vhost::virtual-host-dispatch-table host) :test #'equal))
 
 (defun initialize-server (server)
 
@@ -95,41 +96,52 @@
   (pushnew (hunchentoot::create-folder-dispatcher-and-handler
             "/nuclblog-css/"
             (ch-asdf:asdf-lookup-path "asdf:/nuclblog/css"))
-           (hunchentoot-vhost::dispatch-table *localhost-host*) :test #'equal)
+           (hunchentoot-vhost::virtual-host-dispatch-table *localhost-host*) :test #'equal)
 
   (pushnew (hunchentoot::create-folder-dispatcher-and-handler
             "/static/"
             (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/static"))
-           (hunchentoot-vhost::dispatch-table *localhost-host*) :test #'equal))
+           (hunchentoot-vhost::virtual-host-dispatch-table *localhost-host*) :test #'equal))
 
 
 (defun start-ssl-services (blog &key (port 4243))
-  (let ((key-file (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/ssl/key-pem"))
-        (cert-file (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/ssl/certificate-pem")))
+  (let ((key-file (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo-data/demo/ssl/key-pem"))
+        (cert-file (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo-data/demo/ssl/certificate-pem")))
     (print (list port key-file cert-file))
-    (let ((ssl-server (hunchentoot:start-server
-                       :ssl-privatekey-file key-file
-                       :ssl-certificate-file cert-file
-                       :port port)))
-      (initialize-server ssl-server)
+    (let ((ssl-acceptor (make-instance 'hunchentoot:ssl-acceptor
+                                     :ssl-privatekey-file key-file
+                                     :ssl-certificate-file cert-file
+                                     :port port)))
+      (hunchentoot:start ssl-acceptor)
+      (initialize-server ssl-acceptor)
       (setf (blog::blog-ssl-port blog) port)
-      ssl-server)))
+      ssl-acceptor)))
 
 (defun start-services (&key
                        (port 4242)
                        (use-ssl t)
                        ssl-port)
-  (setf (hunchentoot:log-file)
-        (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo/demo/log/nuclblog-demo-log"))
+  (let ((access-log-path (ch-asdf:asdf-lookup-path
+                   "asdf:/nuclblog-demo-data/demo/log/nuclblog-demo-access-log")))
+    (ensure-directories-exist access-log-path)
+    (setf hunchentoot:*access-log-pathname*
+          access-log-path))
+  (let ((message-log-path (ch-asdf:asdf-lookup-path
+                          "asdf:/nuclblog-demo-data/demo/log/nuclblog-demo-message-log")))
+    (ensure-directories-exist message-log-path)
+    (setf hunchentoot:*message-log-pathname*
+          message-log-path))
+  
   (let ((blog *blog*))
-    (let ((server (hunchentoot:start-server :port port)))
-      (initialize-server server)
+    (let ((acceptor (make-instance 'hunchentoot:acceptor :port port)))
+      (hunchentoot:start acceptor)
+      (initialize-server acceptor)
       (if use-ssl
           (progn
             (setf (blog::blog-use-ssl-p blog) t)
-            (let ((ssl-server (apply #'start-ssl-services blog
+            (let ((ssl-acceptor (apply #'start-ssl-services blog
                                      (when ssl-port
                                        `(:port ,ssl-port)))))
-              (values server ssl-server)))
-          server))))
+              (values acceptor ssl-acceptor)))
+          acceptor))))
 

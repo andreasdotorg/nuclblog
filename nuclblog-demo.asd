@@ -28,12 +28,7 @@
 ;;; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;;;
 
-(in-package #:cl-user)
-
-(defpackage #:nuclblog-demo-system (:use #:cl #:asdf))
-(in-package #:nuclblog-demo-system)
-
-(defsystem nuclblog-demo
+(asdf:defsystem nuclblog-demo
   :name "nuclblog-demo"
   :author "Cyrus Harmon <ch-lisp@bobobeach.com>"
   :depends-on (:hunchentoot :cl-who :ch-asdf :nuclblog :hunchentoot-vhost)
@@ -49,9 +44,23 @@
                    (:static-file black-css :pathname #p"black.css")
                    (:static-file white-css :pathname #p"white.css")
                    (:static-file sbclbutton-png :pathname #p"sbclbutton.png")))
-     (:module "log"
-      :components ((:static-file "nuclblog-demo-log"
-                    :pathname #p"nuclblog-demo.log")))
+     (:module "ssl"
+      :components ((:static-file "openssl-config"
+                    :pathname #p"openssl.config")))))))
+
+(asdf:defsystem nuclblog-demo-data
+  :name "nuclblog-demo-data"
+  :author "Cyrus Harmon <ch-lisp@bobobeach.com>"
+  :depends-on (:nuclblog-demo)
+  :components
+  ((:module
+    :demo
+    :components
+    ((:module "log"
+      :components ((:static-file "nuclblog-demo-access-log"
+                                 :pathname #p"nuclblog-demo-access-log")
+                   (:static-file "nuclblog-demo-message-log"
+                                 :pathname #p"nuclblog-demo-message-log")))
      (:module "ssl"
       :components ((:static-file "key-pem"
                     :pathname #p"key.pem")
