@@ -51,17 +51,20 @@
                                    "Wine"
                                    "General")
                  :url-root "/blog"
-                 :entry-storage-path (merge-pathnames
-                                      "entries.store"
-                                      (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo-data/demo/storage"))
+                 :entry-storage-path
+                 (merge-pathnames
+                  "entries.store"
+                  (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo-data/demo/storage"))
                  :realm
                  (make-instance 'hunchentoot-auth:realm
-                                :user-storage-path (merge-pathnames
-                                                    "user.store"
-                                                    (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo-data/demo/storage"))
-                                :group-storage-path (merge-pathnames
-                                                     "group.store"
-                                                     (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo-data/demo/storage")))
+                                :user-storage-path
+                                (merge-pathnames
+                                 "user.store"
+                                 (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo-data/demo/storage"))
+                                :group-storage-path
+                                (merge-pathnames
+                                 "group.store"
+                                 (ch-asdf:asdf-lookup-path "asdf:/nuclblog-demo-data/demo/storage")))
                  :buttons '((:href-url "http://weitz.de/hunchentoot/"
                              :id "hunchentoot-button"
                              :img-url "/static/hunchentoot10.png"
