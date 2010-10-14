@@ -322,6 +322,10 @@
       ()
     #'blog-main)
   
+  (define-blog-handler (blog :uri "/")
+      ()
+    #'blog-main)
+  
   (define-blog-handler (blog :uri "/archives")
       (category)
     #'blog-archives)
