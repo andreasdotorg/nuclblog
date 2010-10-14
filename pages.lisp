@@ -142,6 +142,8 @@
   (with-html-page
     ((:html :xmlns "http://www.w3.org/1999/xhtml")
      (:head (:title (str title))
+	    (:link :rel "alternate" :type "application/rss+xml"
+		   :title "RSS feed" :href (blog-rss-url blog))
             (loop for style in (blog-page-css blog)
                do
                (htm
@@ -159,6 +161,8 @@
   `(with-html-page
      ((:html :xmlns "http://www.w3.org/1999/xhtml") 
       (:head (:title (str ,title))
+	     (:link :rel "alternate" :type "application/rss+xml"
+		    :title "RSS feed" :href (blog-rss-url blog))
              (loop for style in (blog-page-css ,blog)
                 do
                   (htm
