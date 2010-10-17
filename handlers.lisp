@@ -88,20 +88,31 @@
         (:|guid| (str (make-full-entry-url blog entry))))))
 
   (defun channel-rss (blog &key (limit 10) category)
-    (setf (content-type*) "application/rss+xml")
-    (with-xml-output-to-string (*standard-output*)
-      (htm (:|rss| :|version| 2.0
-             (:|channel|
-               (:|title| (str (blog-title blog)))
-               (:|link| (str (make-full-root-url blog)))
-               (:|description| (str (blog-subtitle blog)))
-               (:|pubDate| (str (hunchentoot::rfc-1123-date)))
-               (loop for entry in
-                    (apply #'sorted-blog-entries blog
-                           (when category
-                             `(:category ,category)))
-                    for i below limit
-                    do (entry-rss blog entry)))))))
+    "Outputs RSS 2.0 for a complete channel."
+    (let ((latest-change
+	   (loop for entry in
+		(apply #'sorted-blog-entries blog
+		       (when category
+			 `(:category ,category)))
+	      for i below limit
+	      maximizing (blog-entry-revised-time entry) into latest-change
+	      finally (return latest-change))))
+      (setf (content-type*) "application/rss+xml")
+      (hunchentoot::handle-if-modified-since latest-change)
+      (setf (header-out :last-modified) (hunchentoot::rfc-1123-date latest-change))
+      (with-xml-output-to-string (*standard-output*)
+	(htm (:|rss| :|version| 2.0
+	       (:|channel|
+		 (:|title| (str (blog-title blog)))
+		 (:|link| (str (make-full-root-url blog)))
+		 (:|description| (str (blog-subtitle blog)))
+		 (:|pubDate| (str (hunchentoot::rfc-1123-date latest-change)))
+		 (loop for entry in
+		      (apply #'sorted-blog-entries blog
+			     (when category
+			       `(:category ,category)))
+                      for i below limit
+                      do (entry-rss blog entry))))))))
   (eval-when (:compile-toplevel :load-toplevel :execute)
     (setf who::*downcase-tokens-p* *tag-state*)))
 
